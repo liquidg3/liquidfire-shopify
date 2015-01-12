@@ -1,33 +1,31 @@
 {
     "properties": {
-        "selectedAdapter":    {
-            "type":    "nexus",
-            "options": {
-                "label":   "Selected Adapter",
-                "default": "./adapters/Gm"
-            }
-        },
-        "thumbnailDir":       {
-            "type":    "path",
-            "options": {
-                "label":       "Thumbnail Dir",
-                "description": "Where should thumbnails be rendered?"
-            }
-        },
-        "publicThumbnailUri": {
+        "shopName":    {
             "type":    "string",
             "options": {
-                "label":       "Public Thumbnail Dir",
-                "description": "This is where thumbnails will be made available to the public.",
-                "default":     "/public/_thumbnails"
+                "label":   "Shop Name",
+                "required": true
             }
         },
-        "publicThumbGeneration": {
-            "type":    "boolean",
+        "apiKey":       {
+            "type":    "string",
             "options": {
-                "label":       "Enable Public Thumbnail Generation",
-                "description": "I will expose an endpoint at /v1/images/generate-thumb",
-                "default":     false
+                "label":       "API Key",
+                "required":     true
+            }
+        },
+        "sharedSecret": {
+            "type":    "string",
+            "options": {
+                "label":       "Shared Secret",
+                "required":    true
+            }
+        },
+        "scope": {
+            "type":    "string",
+            "options": {
+                "label":       "Scope",
+                "default":     "read_products"
             }
         }
     }

@@ -1,5 +1,8 @@
 {
     "name":         "liquidfire:Shopify",
     "version":      "0.0.1",
-    "description":  "Put your description in here!"
+    "description":  "Create a Shopify app real easy like.",
+    "altairDependencies": {
+        "titan:Alfred": ">=0.0.x"
+    }
 }

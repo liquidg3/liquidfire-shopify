@@ -1,22 +1,15 @@
 /**
- * Freshly forged module ready to go!
+ * Shopify and profit
  *
- * @author:     **Your name here**
- * @license:    **Your license here**
+ * @author:     Taylor Romero
+ * @license:    MIT
  * @vendor:     liquidfire
  * @module:     Shopify
  * @nexus:      this.nexus("liquidfire:Shopify")
  *
- * What next?
- *
- * 1. Setting up listeners: altair.io/docs/listeners.md
- * 2. Using extensions: altair.io/docs/extensions.md
- * 3. Building a Commander: altair.io/core/vendors/altair/modules/commandcentral/README.md
- * 4. The Adapter Pattern:  altair.io/core/vendors/altair/modules/adapters/README.md
- *
  */
 
-define(['altair/facades/declare', //take a look at terms.md
+define(['altair/facades/declare',
         'altair/Lifecycle',
         'altair/mixins/_AssertMixin',
         'altair/plugins/node!fs',
@@ -27,9 +20,6 @@ define(['altair/facades/declare', //take a look at terms.md
              fs,
              Emitter) {
 
-    //by mixing in Lifecycle, we get startup(options), execute(options), and shutdown()
-    //by mixing in Emitter we get on() and emit()
-    //by mixing in _AssertMixin we get this.assert() and other related methods
     return declare([Lifecycle, Emitter, _AssertMixin], {
 
 
