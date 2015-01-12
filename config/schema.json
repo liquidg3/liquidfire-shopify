@@ -1,0 +1,34 @@
+{
+    "properties": {
+        "selectedAdapter":    {
+            "type":    "nexus",
+            "options": {
+                "label":   "Selected Adapter",
+                "default": "./adapters/Gm"
+            }
+        },
+        "thumbnailDir":       {
+            "type":    "path",
+            "options": {
+                "label":       "Thumbnail Dir",
+                "description": "Where should thumbnails be rendered?"
+            }
+        },
+        "publicThumbnailUri": {
+            "type":    "string",
+            "options": {
+                "label":       "Public Thumbnail Dir",
+                "description": "This is where thumbnails will be made available to the public.",
+                "default":     "/public/_thumbnails"
+            }
+        },
+        "publicThumbGeneration": {
+            "type":    "boolean",
+            "options": {
+                "label":       "Enable Public Thumbnail Generation",
+                "description": "I will expose an endpoint at /v1/images/generate-thumb",
+                "default":     false
+            }
+        }
+    }
+}
