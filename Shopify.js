@@ -12,87 +12,170 @@
 define(['altair/facades/declare',
         'altair/Lifecycle',
         'altair/mixins/_AssertMixin',
-        'altair/plugins/node!fs',
-        'altair/events/Emitter'
+        'apollo/_HasSchemaMixin',
+        'altair/events/Emitter',
+        'altair/facades/mixin',
+        'lodash'
 ], function (declare,
              Lifecycle,
              _AssertMixin,
-             fs,
-             Emitter) {
+             _HasSchemaMixin,
+             Emitter,
+             mixin,
+             _) {
 
-    return declare([Lifecycle, Emitter, _AssertMixin], {
+    return declare([Lifecycle, Emitter, _HasSchemaMixin, _AssertMixin], {
 
-
-        /**
-         * Startup is called after every module is instantiated, you can only rely on modules existing that
-         * you have specified in your package.json as altairDependencies.
-         *
-         * @param options passed through from altair.json
-         * @returns {altair.Promise}
-         */
         startup: function (options) {
 
-            //use the options that were passed in, or the ones we have by default; avoid mutating options
-            var _options = options || this.options || {};
+            //check to make sure we have a database connection
+            var db = this.nexus('cartridges/Database');
 
-            this.log('Executing startup() for liquidfire:Shopify'); //this.log is one of many extensions you have available in Altair
+            if (!db.connection() || !options) {
+                this.warn('Shopify needs at least one database connection configured.');
+            } else {
 
+                //drop in routes
+                this.on('titan:Alfred::will-execute-app').then(this.hitch('onWillExecuteAlfredApp'));
 
-//            //if your startup is going to take a moment, you should instantiate a Deferred. This is functionality
-//            //provided to us by Lifecycle. By overriding this.deferred we are telling Lifecycle to wait until we
-//            //manually call this.deferred.resolve();
-//
-//            this.deferred = new this.Deferred();
-//
-//            //use the hitch facade to bind any function to any scope
-//            setTimeout(hitch(this, function () {
-//
-//                //once our long running setup is complete, resolve the deferred
-//                this.deferred.resolve(this);
-//
-//            }), 250);
+                //drop in shopify api into events
+                this.on('titan:Alfred::did-receive-request').then(this.hitch('onDidReceiveAlfredRequest'));
 
-            //let any mixin run their startup
-            return this.inherited(arguments);
-        },
-
-        /**
-         * Execute is called after every modules' startup() is triggered. You can be certain that the environment is as
-         * setup as it can possibly be by this point. execute()s are fired in the same order as startup()s and follow the
-         * same deferred pattern. Simply this.deferred = new this.Deferred() just like in startup().
-         *
-         * @returns {altair.Promise}
-         */
-        execute: function () {
+            }
 
             return this.inherited(arguments);
 
         },
 
         /**
-         * Because javascript is such a flexible language, it can be easy to make mistakes that would otherwise be
-         * impossible in compiled languages. To make live easier for everyone, you should take advantage of the
-         * _Assert mixin's API for validating function parameters.
+         * Setup our routes in Alfred
          *
-         * @param arg1
-         * @param arg2
+         * @param e
          */
-        myCustomFunction: function (arg1, arg2) {
+        onWillExecuteAlfredApp: function (e) {
 
-            this.assertString(arg1, 'You must pass a string');
-            this.assert(!!arg2, 'You must pass both arguments');
+            var options = e.get('options');
+
+            if (this.get('apiKey') && !options.routes['/shopify']) {
+
+                var routes = _.clone(options.routes);
+
+                options.routes = {};
+
+                //shopify authenticate
+                options.routes['/shopify'] = {
+                    action: 'liquidfire:Shopify/controllers/Shopify::shopify',
+                    layoutContext: {
+                        title:  'Shopify',
+                        bodyClass: 'shopify'
+                    }
+                };
+
+                //install url
+                options.routes['/shopify/auth'] = {
+                    action: 'liquidfire:Shopify/controllers/Shopify::auth',
+                    layout: false
+                };
+
+                //entities
+                _.each(['products'], function (name) {
+
+                    options.routes['/v1/rest/shopify/' + name + '.json'] = {
+                        action: 'liquidfire:Shopify/controllers/Rest::' + name,
+                        layout: false
+                    };
+
+                })
+
+                //copy back routes
+                _.each(routes, function (route, key) {
+                   options.routes[key] = route;
+                });
+
+            } else {
+                this.warn('No store configured. See shopify\'s README.md for help getting started.');
+            }
+
+        },
+
+
+        /**
+         * Builds you an api object
+         *
+         * @param options
+         */
+        api: function (e, options) {
+
+            this.assert(e, 'You must pass an event with a valid request to api().');
+
+            var api,
+                request     = e.get('request'),
+                response    = e.get('response')
+                _options    = mixin({
+                shop:                   this.get('shopName'),
+                shopify_api_key:        this.get('apiKey'),
+                shopify_shared_secret:  this.get('sharedSecret'),
+                shopify_scope:          this.get('scope'),
+                redirect_uri:           '/shopify/auth'
+            }, options || {});
+
+            //drop in domain and protocol
+            var redirect = request.hostWithProtocol() + _options.redirect_uri;
+            _options.redirect_uri = redirect;
+
+            require(['altair/plugins/node!shopify-node-api', 'altair/plugins/node!cookies'], function (Shopify, Cookies) {
+
+                var cookies = request && response ? new Cookies(request.raw(), response.raw()) : null,
+                    token   = cookies && cookies.get('shopify');
+
+                //do we have an access token?
+                if (token) {
+                    _options.access_token = token;
+                }
+
+                api = new Shopify(_options);
+
+
+            });
+
+
+            return api;
 
         },
 
         /**
-         * Make sure anything you setup in startup gets torn down here. A module in Altair *must* be able capable of
-         * starting up and shutting down while Altair is running and it should not create any artifacts.
+         * Setup environment, called because of _HasCookiesMixin
          *
-         * @returns {altair.Promise}
+         * @param e
          */
-        teardown: function () {
-            return this.inherited(arguments);
-        }
+        onDidReceiveAlfredRequest: function (e) {
+
+            var api     = this.api(e),
+                apiKey  = '',
+                shop    = '',
+                theme   = e.get('theme');
+
+            if (api.config.access_token) {
+
+                apiKey = api.config.access_token;
+                shop   = api.config.shop;
+
+                e.set('shopify', api);
+
+            }
+
+            if (theme) {
+                theme.set('shopifyApiKey', apiKey);
+                theme.set('shopifyShopName', shop);
+            }
+
+
+
+        },
+
+
+
+
 
     });
 });

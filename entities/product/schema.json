@@ -1,0 +1,120 @@
+{
+    "name":       "Products",
+    "tableName":  "shopify_products",
+    "properties": {
+
+        "_id": {
+            "type":    "primary",
+            "options": {
+                "label": "Id"
+            }
+        },
+
+        "created_at": {
+            "type":    "date",
+            "options": {
+                "label": "Created At"
+            }
+        },
+
+        "updated_at": {
+            "type":    "date",
+            "options": {
+                "label": "Updated At"
+            }
+        },
+
+        "published_at": {
+            "type":    "date",
+            "options": {
+                "label": "Published At"
+            }
+        },
+
+        "body_html": {
+            "type":    "string",
+            "options": {
+                "label": "Body HTML"
+            }
+        },
+
+        "handle": {
+            "type":    "string",
+            "options": {
+                "label": "Handle"
+            }
+        },
+
+        "image": {
+            "type":    "object",
+            "options": {
+                "label": "Image"
+            }
+        },
+
+        "images": {
+            "type":    "object",
+            "options": {
+                "label": "Images",
+                "many": true
+            }
+        },
+
+        "options": {
+            "type":    "object",
+            "options": {
+                "label": "Options"
+            }
+        },
+
+        "product_type": {
+            "type":    "string",
+            "options": {
+                "label": "Product Type"
+            }
+        },
+
+        "published_scope": {
+            "type":    "string",
+            "options": {
+                "label": "Published Scope"
+            }
+        },
+
+        "tags": {
+            "type":    "string",
+            "options": {
+                "label": "Tags"
+            }
+        },
+
+        "template_suffix": {
+            "type":    "string",
+            "options": {
+                "label": "Template Suffix"
+            }
+        },
+
+        "title": {
+            "type":    "string",
+            "options": {
+                "label": "Title"
+            }
+        },
+
+        "variants": {
+            "type":    "object",
+            "options": {
+                "label": "Variants"
+            }
+        },
+
+        "vendor": {
+            "type":    "string",
+            "options": {
+                "label": "Vendor"
+            }
+        }
+
+    }
+}

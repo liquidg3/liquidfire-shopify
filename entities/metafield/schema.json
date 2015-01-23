@@ -1,0 +1,90 @@
+{
+    "name":       "MetaFields",
+    "tableName":  "shopify_meta_fields",
+    "properties": {
+
+        "_id": {
+            "type":    "primary",
+            "options": {
+                "label": "Id"
+            }
+        },
+
+        "created_at": {
+            "type":    "date",
+            "options": {
+                "label": "Created At"
+            }
+        },
+
+        "updated_at": {
+            "type":    "date",
+            "options": {
+                "label": "Updated At"
+            }
+        },
+
+        "description": {
+            "type":    "string",
+            "options": {
+                "label": "Description"
+            }
+        },
+
+        "key": {
+            "type":    "string",
+            "options": {
+                "label": "Key"
+            }
+        },
+
+        "namespace": {
+            "type":    "string",
+            "options": {
+                "label": "Namespace"
+            }
+        },
+
+        "owner_id": {
+            "type":    "integer",
+            "options": {
+                "label": "Owner ID"
+            }
+        },
+
+        "owner_resorce": {
+            "type":    "string",
+            "options": {
+                "label": "Owner Resource"
+            }
+        },
+
+        "value": {
+            "type":    "string",
+            "options": {
+                "label": "Value"
+            }
+        },
+
+        "value_type": {
+            "type":    "select",
+            "options": {
+                "label": "Type",
+                "choices": {
+                    "integer": "Integer",
+                    "string":  "String"
+                }
+            }
+        },
+
+        "product": {
+            "type":    "entity",
+            "options": {
+                "label": "Product",
+                "entity": "liquidfire:Shopify/entities/Product"
+            }
+        }
+
+
+    }
+}

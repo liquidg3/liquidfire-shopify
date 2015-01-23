@@ -7,6 +7,15 @@
                 "required": true
             }
         },
+        "appVersion": {
+            "type": "string",
+            "options": {
+                "label": "App Version",
+                "required": true,
+                "description": "The version of your app. Incrementing these will trigger update events next login.",
+                "default": "0.0.1"
+            }
+        },
         "apiKey":       {
             "type":    "string",
             "options": {
@@ -26,6 +35,13 @@
             "options": {
                 "label":       "Scope",
                 "default":     "read_products"
+            }
+        },
+        "redirectUrl": {
+            "type":    "string",
+            "options": {
+                "label":       "Redirect URL",
+                "default":     "Where to send someone after authenticating."
             }
         }
     }

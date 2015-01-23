@@ -2,6 +2,15 @@
     "name":         "liquidfire:Shopify",
     "version":      "0.0.1",
     "description":  "Create a Shopify app real easy like.",
+    "events": {
+        "will-install": "Your app is about to install",
+        "install": "App is being installed",
+        "did-install": "App was installed"
+    },
+    "dependencies": {
+        "shopify-node-api": ">=1.4.x",
+        "cookies": ">=0.5.x"
+    },
     "altairDependencies": {
         "titan:Alfred": ">=0.0.x"
     }
