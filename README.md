@@ -97,7 +97,7 @@ onDidReceiveRequest: function (e) {
 }
 
 ## Force Login on All Pages
-Exactly like before, but add the following to your `App.js`. The biggest difference is that we have to make sure we aren't redirecting if the requst is handled by the `Shopify` controller.
+Exactly like before, but add the following to your `App.js`. The biggest difference is that we have to make sure we are not redirecting if the requst is handled by the `Shopify` controller.
 
 ```js
 onDidReceiveRequest: function (e) {
