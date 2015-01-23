@@ -85,7 +85,7 @@ onDidReceiveRequest: function (e) {
     var shopify     = e.get('shopify'),
         response    = e.get('response');
 
-    //if there is no shopify model in the event, we are not authenticated
+    //if there is no shopify api in the event, we are not authenticated
     if (!shopify) {
 
         //redirect and stop this event
