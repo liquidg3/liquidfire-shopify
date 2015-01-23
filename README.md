@@ -50,7 +50,7 @@ If you are using the [Embedded SDK](http://docs.shopify.com/embedded-app-sdk) yo
 In order to facilitate the login progress, a few routes are added to Alfred:
 
 * `/shopify` - the login page for your app. Send people here to authenticate them (or install the app on first setup)
-* `/auth' - shopify sends people back here and we finish the auth process
+* `/auth` - shopify sends people back here and we finish the auth process
 
 ## Events
 Hook into these events in your `App.js` or any `Controller`;
@@ -97,10 +97,9 @@ onDidReceiveRequest: function (e) {
 }
 
 ## Force Login on All Pages
-Exactly like before, but add the following to your `App.js`. The biggest difference is that we have to make sure we aren't
-redirecting if the requst is handled by the `Shopify` controller.
-```js
+Exactly like before, but add the following to your `App.js`. The biggest difference is that we have to make sure we aren't redirecting if the requst is handled by the `Shopify` controller.
 
+```js
 onDidReceiveRequest: function (e) {
 
     var shopify     = e.get('shopify'),
@@ -117,8 +116,48 @@ onDidReceiveRequest: function (e) {
     }
 
 }
+```
+
 ## REST endpoints
-The following endpoints are available to you for your convenience.
+The following endpoints are available to you for your convenience. They mostly map 1-for-1 with [Shopify's own API](http://docs.shopify.com/api).
 
-`/v1/rest/shopify/products.json` - all products. This 
+`/v1/rest/shopify/products.json` - all products. See [Shopify API](http://docs.shopify.com/api/product/) for details.
 
+
+## Working with Shopify Objects
+Objects in Shopify are handled by the `Spectre` entity system. That means, to find a product, you can do the following:
+
+```
+
+this.entity('liquidfire:Shopify/entities/Product').then(function (products) {
+
+    var p = products.create({
+        title: 'my new product',
+        handle: 'taco'
+    });
+    
+    //will save the product back to shopify asyncronously
+    p.save().then(function (product) {
+    
+        this.log(product.get('title') + ' was created');
+    
+    }.bind(this).otherwise(function (err) {
+    
+        this.err(err);
+        
+    }.bind(this); 
+    
+    
+    //searching
+    return products.findOne().where('handle', '===', 'taco').execute();
+
+}).then(function (product) {
+
+    if (product) {
+        this.log('yay!'); 
+    }
+    
+}.bind(this));
+
+
+```
