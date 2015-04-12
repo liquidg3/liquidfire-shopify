@@ -20,6 +20,6 @@
         "cookies": ">=0.5.x"
     },
     "altairDependencies": {
-        "titan:Alfred": ">=0.0.x"
+        "titan:Alfred": ">=0.1.x"
     }
 }
