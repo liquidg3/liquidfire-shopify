@@ -187,7 +187,6 @@ define(['altair/facades/declare',
             var _options = options || {},
                 endpoint = _options.findOne ? this._getEndpoint : this._findEndpoint;
 
-
             this.assert(endpoint, 'you must set a _findEndpoint and _getEndpoint on your store.');
 
             var api     = options.shopify || options.event.get('shopify'),

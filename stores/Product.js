@@ -8,6 +8,7 @@ define(['altair/facades/declare',
 
         _findEndpoint:      '/admin/products.json',
         _updateEndpoint:    '/admin/products/{{id}}.json',
+        _getEndpoint:       '/admin/products/{{id}}.json',
         _keyPlural:         'products',
         _keySingular:       'product'
 
