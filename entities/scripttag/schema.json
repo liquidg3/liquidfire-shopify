@@ -1,0 +1,46 @@
+{
+    "name":       "Customers",
+    "tableName":  "shopify_customers",
+    "properties": {
+
+        "_id": {
+            "type":    "primary",
+            "options": {
+                "label": "Id",
+                "type": "integer"
+            }
+        },
+
+        "created_at": {
+            "type":    "date",
+            "options": {
+                "label": "Created At"
+            }
+        },
+
+        "updated_at": {
+            "type":    "date",
+            "options": {
+                "label": "Updated At"
+            }
+        },
+
+        "event": {
+            "type":    "string",
+            "options": {
+                "label": "Event",
+                "default": "onload",
+                "description": "only valid option."
+            }
+        },
+
+        "src": {
+            "type":    "string",
+            "options": {
+                "label": "Source of js file."
+            }
+        }
+
+
+    }
+}

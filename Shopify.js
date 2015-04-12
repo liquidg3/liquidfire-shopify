@@ -26,6 +26,8 @@ define(['altair/facades/declare',
 
     return declare([Lifecycle, Emitter, _HasSchemaMixin, _AssertMixin], {
 
+        _apiCache: {},
+        _shopifyModel: null, //models/Shopify
         startup: function (options) {
 
             //check to make sure we have a database connection
@@ -34,6 +36,9 @@ define(['altair/facades/declare',
             if (!db.connection() || !options) {
                 this.warn('Shopify needs at least one database connection configured.');
             } else {
+
+                //so we can do work later
+                this._shopifyModel = this.model('liquidfire:Shopify/models/Shopify');
 
                 //drop in routes
                 this.on('titan:Alfred::will-execute-app').then(this.hitch('onWillExecuteAlfredApp'));
@@ -63,31 +68,55 @@ define(['altair/facades/declare',
                 options.routes = {};
 
                 //shopify authenticate
-                options.routes['/shopify'] = {
-                    action: 'liquidfire:Shopify/controllers/Shopify::shopify',
-                    layoutContext: {
-                        title:  'Shopify',
-                        bodyClass: 'shopify'
-                    }
-                };
+                if (!options.routes['/shopify']) {
+
+                    options.routes['/shopify'] = {
+                        action: 'liquidfire:Shopify/controllers/Shopify::shopify',
+                        layoutContext: {
+                            title:  'Shopify',
+                            bodyClass: 'shopify'
+                        }
+                    };
+
+                }
 
                 //install url
-                options.routes['/shopify/auth'] = {
-                    action: 'liquidfire:Shopify/controllers/Shopify::auth',
-                    layout: false
-                };
+                if (!options.routes['/shopify/auth']) {
+
+                    options.routes['/shopify/auth'] = {
+                        action: 'liquidfire:Shopify/controllers/Shopify::auth',
+                        layout: false
+                    };
+
+                }
+
+                //settings
+                if (!options.routes['/shopify/preferences']) {
+
+                    options.routes['/shopify/preferences'] = {
+                        action: 'liquidfire:Shopify/controllers/Shopify::preferences',
+                        layoutContext: {
+                            title: 'Preferences',
+                            bodyClass: 'preferences'
+                        }
+                    };
+
+                }
 
                 //entities
                 _.each(['products'], function (name) {
 
-                    options.routes['/v1/rest/shopify/' + name + '.json'] = {
-                        action: 'liquidfire:Shopify/controllers/Rest::' + name,
-                        layout: false
-                    };
+                    if (!options.routes['/v1/rest/shopify/' + name + '.json']) {
+                        options.routes['/v1/rest/shopify/' + name + '.json'] = {
+                            action: 'liquidfire:Shopify/controllers/Rest::' + name,
+                            layout: false
+                        };
+                    }
+                });
 
-                })
 
-                //copy back routes
+
+                //copy back routes (this ensures the angular routes are first)
                 _.each(routes, function (route, key) {
                    options.routes[key] = route;
                 });
@@ -116,7 +145,9 @@ define(['altair/facades/declare',
                 shopify_api_key:        this.get('apiKey'),
                 shopify_shared_secret:  this.get('sharedSecret'),
                 shopify_scope:          this.get('scope'),
-                redirect_uri:           '/shopify/auth'
+                redirect_uri:           '/shopify/auth',
+                verbose:                false,
+                preferences_schema:     this.get('preferencesSchema')
             }, options || {});
 
             //drop in domain and protocol
@@ -135,12 +166,34 @@ define(['altair/facades/declare',
 
                 api = new Shopify(_options);
 
+            }.bind(this));
 
+
+            if (api.config.access_token)  {
+
+                this._apiCache['https://' + _options.shop + '.myshopify.com']   = api;
+                this._apiCache[_options.shop + '.myshopify.com']                = api;
+                this._apiCache[_options.shop]                                   = api;
+
+            }
+
+            this.emit('did-build-api', {
+                api: api,
+                options: _options
             });
-
 
             return api;
 
+        },
+
+        /**
+         * If we have an api available, we'll use it.
+         *
+         * @param key
+         * @returns {Shopify}
+         */
+        shopApi: function (shop) {
+            return this._apiCache[shop];
         },
 
         /**
@@ -157,7 +210,7 @@ define(['altair/facades/declare',
 
             if (api.config.access_token) {
 
-                apiKey = api.config.access_token;
+                apiKey = api.config.shopify_api_key;
                 shop   = api.config.shop;
 
                 e.set('shopify', api);
@@ -169,13 +222,19 @@ define(['altair/facades/declare',
                 theme.set('shopifyShopName', shop);
             }
 
+            //load the shop's settings and drop them into the request
+            if (shop) {
+
+                return this._shopifyModel.shopSettings(api).then(function (doc) {
+                    e.set('shop', doc);
+                });
 
 
-        },
+            }
 
-
-
+        }
 
 
     });
+
 });

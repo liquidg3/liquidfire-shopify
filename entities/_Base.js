@@ -7,7 +7,7 @@ define(['altair/facades/declare',
         mixin: function (values) {
 
             //map ID field
-            if (values['id']) {
+            if (values && values['id']) {
                 values[this.primaryProperty().name] = values['id'];
             }
 

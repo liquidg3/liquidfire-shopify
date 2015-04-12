@@ -1,0 +1,173 @@
+{
+    "name":       "Product Variants",
+    "tableName":  "shopify_product_variants",
+    "properties": {
+
+        "_id": {
+            "type":    "primary",
+            "options": {
+                "label": "Id",
+                "type": "integer"
+            }
+        },
+
+        "created_at": {
+            "type":    "date",
+            "options": {
+                "label": "Created At"
+            }
+        },
+
+        "updated_at": {
+            "type":    "date",
+            "options": {
+                "label": "Updated At"
+            }
+        },
+
+        "barcode": {
+            "type":    "string",
+            "options": {
+                "label": "Bar Code"
+            }
+        },
+
+        "compare_at_price": {
+            "type":    "string",
+            "options": {
+                "label": "Compare at Price",
+                "description": "The competitors prices for the same item."
+            }
+        },
+
+        "fulfillment_service": {
+            "type":    "select",
+            "options": {
+                "label": "Fulfillment Services",
+                "choices": {
+                    "manual": "Manual"
+                }
+            }
+        },
+
+        "grams": {
+            "type":    "float",
+            "options": {
+                "label": "Grams"
+            }
+        },
+
+        "image_id": {
+            "type":    "string",
+            "options": {
+                "label": "Image ID"
+            }
+        },
+
+        "inventory_management": {
+            "type":    "select",
+            "options": {
+                "label": "Inventory Managament",
+                "choices": {
+                    "shopify": "Shopify"
+                }
+            }
+        },
+        "inventory_policy": {
+            "type":    "select",
+            "options": {
+                "label": "Inventory Policy",
+                "default": "deny",
+                "choices": {
+                    "deny": "Customers are not allowed to place orders for a product variant when it's out of stock.",
+                    "continue": "Customers are allowed to place orders for a product variatn when it's out of stock."
+                }
+            }
+        },
+        "inventory_quantity": {
+            "type":    "integer",
+            "options": {
+                "label": "Inventory Quantity"
+            }
+        },
+
+        "old_inventory_quantity": {
+            "type":    "integer",
+            "options": {
+                "label": "Old Inventory Quantity"
+            }
+        },
+
+        "inventory_quantity_adjustment": {
+            "type":    "integer",
+            "options": {
+                "label": "Inventory Quantity Adjustment"
+            }
+        },
+
+        "option": {
+            "type":    "object",
+            "options": {
+                "label": "Option"
+            }
+        },
+
+        "position": {
+            "type":    "integer",
+            "options": {
+                "label": "Position"
+            }
+        },
+
+        "price": {
+            "type":    "float",
+            "options": {
+                "label": "Price"
+            }
+        },
+
+        "product": {
+            "type":    "entity",
+            "options": {
+                "label": "Product",
+                "entity": "liquidfire:Shopify/entities/Product"
+            }
+        },
+
+        "requires_shipping": {
+            "type":    "boolean",
+            "options": {
+                "label": "Requires Shipping"
+            }
+        },
+
+        "sku": {
+            "type":    "string",
+            "options": {
+                "label": "SKU"
+            }
+        },
+
+        "taxable": {
+            "type":    "boolean",
+            "options": {
+                "label": "Taxable"
+            }
+        },
+
+        "title": {
+            "type":    "string",
+            "options": {
+                "label": "Title"
+            }
+        },
+
+        "metafields": {
+            "type": "object",
+            "options": {
+                "label": "Metafields"
+            }
+        }
+
+    }
+}

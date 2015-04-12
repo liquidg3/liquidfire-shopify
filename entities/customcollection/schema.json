@@ -1,128 +1,96 @@
 {
-    "name":       "Products",
-    "tableName":  "shopify_products",
+    "name": "Custom Collection",
+    "tableName": "shopify_custom_collections",
     "properties": {
-
         "_id": {
-            "type":    "primary",
+            "type": "primary",
             "options": {
                 "label": "Id",
                 "type": "integer"
             }
         },
-
         "created_at": {
-            "type":    "date",
+            "type": "date",
             "options": {
                 "label": "Created At"
             }
         },
-
         "updated_at": {
-            "type":    "date",
+            "type": "date",
             "options": {
                 "label": "Updated At"
             }
         },
-
+        "published": {
+            "type": "boolean",
+            "options": {
+                "label": "Published"
+            }
+        },
         "published_at": {
-            "type":    "date",
+            "type": "date",
             "options": {
                 "label": "Published At"
             }
         },
-
         "body_html": {
-            "type":    "string",
+            "type": "string",
             "options": {
                 "label": "Body HTML"
             }
         },
-
         "handle": {
-            "type":    "string",
+            "type": "string",
             "options": {
                 "label": "Handle"
             }
         },
-
         "image": {
-            "type":    "object",
+            "type": "object",
             "options": {
                 "label": "Image"
             }
         },
-
         "images": {
-            "type":    "object",
+            "type": "object",
             "options": {
                 "label": "Images",
                 "many": true
             }
         },
-
-        "options": {
-            "type":    "object",
+        "sort_order": {
+            "type": "select",
             "options": {
-                "label": "Options"
+                "label": "Sort Order",
+                "choices": {
+                    "alpha-asc": "Alphabetically, in ascending order (A - Z).",
+                    "alpha-desc": "Alphabetically, in descending order (Z - A).",
+                    "best-selling": "By best-selling products.",
+                    "created": "By date created, in ascending order (oldest - newest).",
+                    "created-desc": "By date created, in descending order (newest - oldest).",
+                    "manual": "Order created by the shop owner.",
+                    "price-asc": "By price, in ascending order (lowest - highest).",
+                    "price-desc": "By price, in descending order (highest - lowest)."
+                }
             }
         },
-
-        "product_type": {
-            "type":    "string",
-            "options": {
-                "label": "Product Type"
-            }
-        },
-
         "published_scope": {
-            "type":    "string",
+            "type": "string",
             "options": {
                 "label": "Published Scope"
             }
         },
-
-        "tags": {
-            "type":    "string",
-            "options": {
-                "label": "Tags"
-            }
-        },
-
         "template_suffix": {
-            "type":    "string",
+            "type": "string",
             "options": {
                 "label": "Template Suffix"
             }
         },
-
         "title": {
-            "type":    "string",
+            "type": "string",
             "options": {
                 "label": "Title"
             }
-        },
-
-        "variants": {
-            "type":    "object",
-            "options": {
-                "label": "Variants"
-            }
-        },
-
-        "vendor": {
-            "type":    "string",
-            "options": {
-                "label": "Vendor"
-            }
-        },
-
-        "metafields": {
-            "type": "object",
-            "options": {
-                "label": "Metafields"
-            }
         }
-
     }
 }

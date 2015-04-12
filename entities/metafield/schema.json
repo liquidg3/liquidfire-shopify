@@ -1,12 +1,13 @@
 {
-    "name":       "MetaFields",
-    "tableName":  "shopify_meta_fields",
+    "name":       "Metafields",
+    "tableName":  "shopify_metafields",
     "properties": {
 
         "_id": {
             "type":    "primary",
             "options": {
-                "label": "Id"
+                "label": "Id",
+                "type": "integer"
             }
         },
 
@@ -52,10 +53,20 @@
             }
         },
 
-        "owner_resorce": {
-            "type":    "string",
+        "owner_resource": {
+            "type":    "select",
             "options": {
-                "label": "Owner Resource"
+                "label": "Owner Resource",
+                "choices": {
+                    "product": "Product",
+                    "product_image": "Product Image",
+                    "product_variant": "Product Variant",
+                    "blog": "Blog",
+                    "custom_collection": "Custom Collection",
+                    "customer": "Customer",
+                    "order": "Order",
+                    "page": "Page"
+                }
             }
         },
 
@@ -82,6 +93,14 @@
             "options": {
                 "label": "Product",
                 "entity": "liquidfire:Shopify/entities/Product"
+            }
+        },
+
+        "customer": {
+            "type":    "entity",
+            "options": {
+                "label": "Customer",
+                "entity": "liquidfire:Shopify/entities/Customer"
             }
         }
 

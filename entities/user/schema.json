@@ -1,0 +1,70 @@
+{
+    "name":       "Users",
+    "tableName":  "shopify_users",
+    "properties": {
+
+        "_id": {
+            "type":    "primary",
+            "options": {
+                "label": "Id",
+                "type": "integer"
+            }
+        },
+
+        "created_at": {
+            "type":    "date",
+            "options": {
+                "label": "Created At"
+            }
+        },
+
+        "updated_at": {
+            "type":    "date",
+            "options": {
+                "label": "Updated At"
+            }
+        },
+
+        "account_owner": {
+            "type":    "boolean",
+            "options": {
+                "label": "Account owner"
+            }
+        },
+
+        "im": {
+            "type":    "string",
+            "options": {
+                "label": "Instant Messenger"
+            }
+        },
+
+        "permissions": {
+            "type":    "string",
+            "options": {
+                "label": "Permissions",
+                "many": true
+            }
+        },
+
+        "phone": {
+            "type":    "string",
+            "options": {
+                "label": "Phone"
+            }
+        },
+
+        "user_type": {
+            "type":    "select",
+            "options": {
+                "label": "Account Type",
+                "choices": {
+                    "regular": "Regular",
+                    "open_id": "Open ID (Google Auth)",
+                    "restricted": "Restricted (no admin access)"
+                }
+            }
+        }
+
+    }
+}

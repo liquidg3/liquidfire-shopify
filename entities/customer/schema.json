@@ -1,0 +1,134 @@
+{
+    "name": "Customers",
+    "tableName": "shopify_customers",
+    "properties": {
+        "_id": {
+            "type": "primary",
+            "options": {
+                "label": "Id",
+                "type": "integer"
+            }
+        },
+        "created_at": {
+            "type": "date",
+            "options": {
+                "label": "Created At"
+            }
+        },
+        "updated_at": {
+            "type": "date",
+            "options": {
+                "label": "Updated At"
+            }
+        },
+        "accepts_marketing": {
+            "type": "boolean",
+            "options": {
+                "label": "Accepts Marketing"
+            }
+        },
+        "addresses": {
+            "type": "object",
+            "options": {
+                "label": "Addresses",
+                "many": true
+            }
+        },
+        "default_address": {
+            "type": "object",
+            "options": {
+                "label": "Default Address"
+            }
+        },
+        "email": {
+            "type": "string",
+            "options": {
+                "label": "Email",
+                "required": true
+            }
+        },
+        "first_name": {
+            "type": "string",
+            "options": {
+                "label": "First Name"
+            }
+        },
+        "last_name": {
+            "type": "string",
+            "options": {
+                "label": "Last Name"
+            }
+        },
+        "metafield": {
+            "type": "object",
+            "options": {
+                "label": "Metafields"
+            }
+        },
+        "multipass_identifier": {
+            "type": "string",
+            "options": {
+                "label": "Multipass ID"
+            }
+        },
+        "last_order_id": {
+            "type": "string",
+            "options": {
+                "label": "Last order ID"
+            }
+        },
+        "last_order_name": {
+            "type": "string",
+            "options": {
+                "label": "Last order name"
+            }
+        },
+        "note": {
+            "type": "string",
+            "options": {
+                "label": "Notes"
+            }
+        },
+        "orders_count": {
+            "type": "integer",
+            "options": {
+                "label": "Total Orders"
+            }
+        },
+        "state": {
+            "type": "select",
+            "options": {
+                "label": "State",
+                "choices": {
+                    "disabled": "Disabled",
+                    "decline": "decline the invite to start an account that saves their customer settings.",
+                    "invited": " accept the invite to start an account that saves their customer settings. Customers then change from \"disabled to \"enabled.\""
+                }
+            }
+        },
+        "tags": {
+            "type": "string",
+            "options": {
+                "label": "Tags"
+            }
+        },
+        "total_spent": {
+            "type": "float",
+            "options": {
+                "label": "Total Spent"
+            }
+        },
+        "verified_email": {
+            "type": "boolean",
+            "options": {
+                "label": "Verified Email"
+            }
+        },
+        "metafields": {
+            "type": "object",
+            "options": {
+                "label": "Metafields"
+            }
+        }
+    }
+}

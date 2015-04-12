@@ -1,11 +1,19 @@
 {
     "name":         "liquidfire:Shopify",
-    "version":      "0.0.1",
+    "version":      "0.0.2",
     "description":  "Create a Shopify app real easy like.",
     "events": {
         "will-install": "Your app is about to install",
         "install": "App is being installed",
-        "did-install": "App was installed"
+        "did-install": "App was installed",
+
+        "will-update": "Your app is about to be updated",
+        "update": "App is being updated",
+        "did-update": "App was updated",
+
+        "did-save-settings": "Anytime your shop settings are saved (will happen during update/install)",
+
+        "did-build-api": "Anytime a shopify api instance is instantiated for a particular shop."
     },
     "dependencies": {
         "shopify-node-api": ">=1.4.x",

@@ -41,7 +41,15 @@
             "type":    "string",
             "options": {
                 "label":       "Redirect URL",
-                "default":     "Where to send someone after authenticating."
+                "description":     "Where to send someone after authenticating."
+            }
+        },
+
+        "preferencesSchema": {
+            "type":    "object",
+            "options": {
+                "label":       "Preferences Schema",
+                "description":     "How the preferences form will render for a shop."
             }
         }
     }

@@ -16,32 +16,35 @@ define(['altair/facades/declare',
          * @param api
          * @returns {*}
          */
-        install: function (api) {
+        install: function (api, e) {
 
             return this.parent.emit('will-install', {
-                api: api,
-                shop: api.config.shop
+                api:            api,
+                shop:           api.config.shop,
+                requestEvent:   e
             }).then(function () {
 
                 return this.parent.emit('install', {
-                    api: api,
-                    shop: api.config.shop
+                    api:            api,
+                    shop:           api.config.shop,
+                    requestEvent:   e
                 });
 
             }.bind(this)).then(function () {
 
                 return this.parent.emit('did-install', {
-                    api: api,
-                    shop: api.config.shop
+                    api:            api,
+                    shop:           api.config.shop,
+                    requestEvent:   e
                 })
 
             }.bind(this)).then(function () {
 
-
                 //save record of install
                 return this.nexus('cartridges/Database').create('shopify_installs').set({
-                    shop: api.config.shop,
-                    version: this.parent.get('appVersion')
+                    shop:               api.config.shop,
+                    appVersion:         this.parent.get('appVersion'),
+                    preferencesSchema:  this.parent.get('preferencesSchema')
                 }).execute();
 
 
@@ -50,6 +53,58 @@ define(['altair/facades/declare',
 
         },
 
+        /**
+         * Update a shop.
+         * @param api the shopify api
+         * @param old the old shop settings
+         *
+         * @returns {*}
+         */
+        update: function (api, old, e) {
+
+            return this.parent.emit('will-update', {
+                api:            api,
+                shop:           api.config.shop,
+                old:            old,
+                requestEvent:   e
+            }).then(function () {
+
+                return this.parent.emit('update', {
+                    api:            api,
+                    shop:           api.config.shop,
+                    old :           old,
+                    requestEvent:   e
+                });
+
+            }.bind(this)).then(function () {
+
+                return this.parent.emit('did-update', {
+                    api:            api,
+                    shop:           api.config.shop,
+                    old:            old,
+                    requestEvent:   e
+                })
+
+            }.bind(this)).then(function () {
+
+                //save record of install
+                return this.nexus('cartridges/Database').update('shopify_installs').set({
+                    appVersion:         this.parent.get('appVersion'),
+                    preferencesSchema:  this.parent.get('preferencesSchema')
+                }).where('shop', '===', api.config.shop).execute();
+
+
+            }.bind(this));
+
+
+        },
+
+        /**
+         * Load all the settings/preferences from your shop
+         *
+         * @param api
+         * @returns {*}
+         */
         shopSettings: function (api) {
 
             return this.nexus('cartridges/Database')
@@ -69,7 +124,16 @@ define(['altair/facades/declare',
 
                     return this.shopSettings(api);
 
-                }.bind(this));
+                }.bind(this)).then(function (doc) {
+
+                    this.parent.emit('liquidfire:Shopify::did-save-settings', {
+                        settings: doc,
+                        shopify:  api
+                    });
+
+                    return doc;
+
+                }.bind(this));;
 
 
         },
@@ -91,9 +155,7 @@ define(['altair/facades/declare',
         persistToken: function (e, token) {
 
             var cookies = e.get('cookies');
-
             cookies.set('shopify', token);
-
 
         },
 
@@ -118,7 +180,6 @@ define(['altair/facades/declare',
             return "<script type='text/javascript'>" +
                 "(window.top || window).location.href = '" + url + "'; " +
                 "</script>";
-
 
         }
 

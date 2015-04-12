@@ -28,7 +28,8 @@ define(['altair/facades/declare',
         shopify: function (e) {
 
             var shopify = this.nexus('liquidfire:Shopify'),
-                api     = e.get('shopify');
+                api     = e.get('shopify'),
+                shop    = e.get('shop');
 
             //have we configured a shop yet?
             if (!shopify.get('shopName')) {
@@ -37,7 +38,7 @@ define(['altair/facades/declare',
 
 
             //do we have a valid API?
-            if (!api) {
+            if (!api || !shop || (shop && shop.appVersion != this.nexus('liquidfire:Shopify').get('appVersion', 0))) {
 
                 return this._shopify.redirectToShopifyAuth(e);
 
@@ -80,9 +81,9 @@ define(['altair/facades/declare',
                     e.set('theme', false);
                     dfd.resolve(err.message);
                 },
-                query = e.get('request').query(),
+                query   = e.get('request').query(),
                 cookies = e.get('cookies'),
-                dfd = new this.Deferred();
+                dfd     = new this.Deferred();
 
 
             this.promise(api, 'exchange_temporary_token', query).then(function (err, token) {
@@ -91,15 +92,55 @@ define(['altair/facades/declare',
 
             }).then(function (doc) {
 
-                if (doc) {
+                if (doc && doc.appVersion != this.nexus('liquidfire:Shopify').get('appVersion')) {
+                    return shopify.update(api, doc, e).then(done).otherwise(fail);
+                } else if (doc) {
                     done();
                 } else {
-                    return shopify.install(api).then(done).otherwise(fail);
+                    return shopify.install(api, e).then(done).otherwise(fail);
                 }
 
-            }).otherwise(fail);
+            }.bind(this)).otherwise(fail);
 
             return dfd;
+
+        },
+
+        /**
+         * /shopify/preferences
+         *
+         * @param e
+         * @returns {*}
+         */
+        preferences: function (e) {
+
+            var api     = e.get('shopify'),
+                shop    = api.config.shop,
+                schema  = api.config.preferences_schema;
+
+            if (!schema) {
+                return 'No Preferences';
+            }
+
+            return this.widget('liquidfire:Forms/widgets/Form.shopify-preferences', {
+                enctype: 'multipart/form-data',
+                formSchema: schema,
+                formValues: {},
+                requestEvent: e
+            }).then(function (widget) {
+
+                //we can save this widget for later, or just render it immediately
+                return widget.render();
+
+            }).then(function (html) {
+
+                return e.get('view').render({
+                    form: html
+                });
+
+
+            });
+
 
         }
 

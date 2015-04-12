@@ -36,6 +36,19 @@ define(['altair/facades/declare',
             return str.join("&");
         },
 
+        create: function (values, options) {
+
+            var entity = this.inherited(arguments);
+
+            this.assert(options, 'you must pass { shopify: api } to create');
+            this.assert(options.shopify, 'you must pass { shopify: api } to create');
+
+            entity.shopify = options.shopify;
+
+            return entity;
+
+        },
+
         /**
          * Helper to GET anything from shopify
          *
@@ -47,29 +60,60 @@ define(['altair/facades/declare',
          */
         get: function (api, statement, endpoint, query) {
 
+            var _endpoint = endpoint;
+
             if (query) {
-                endpoint += endpoint.indexOf('?') === -1 ? '?' : '&';
-                endpoint += this.serialize(query);
+
+                if (query._id) {
+                    query.id = query._id;
+                    delete query._id;
+                }
+
+                _endpoint += _endpoint.indexOf('?') === -1 ? '?' : '&';
+                _endpoint += this.serialize(query);
             }
 
-            return this.promise(api, 'get', endpoint).then(function (data, headers) {
+            statement.endpoint = endpoint;
+            statement.api      = api;
+            statement.query    = query;
 
-                var items = [];
+            return this.promise(api, 'get', _endpoint).then(function (data, headers) {
 
-                _.each(data[0][this._keyPlural] || [], function (item) {
+                var items = [],
+                    results = data[0][this._keySingular] ? [data[0][this._keySingular]] : data[0][this._keyPlural] || [];
 
-                    items.push(this.create(item));
+                _.each(results, function (item) {
+
+                    item = this.create(item, {
+                        shopify: api
+                    });
+                    items.push(item);
 
                 }.bind(this));
 
-                return new ArrayCursor(items, statement);
+                return new ArrayCursor(items, statement, undefined, function (cursor) {
 
-            }.bind(this)).otherwise(function (err) {
+                    var statement = cursor.statement(),
+                        query     = cursor.query,
+                        endpoint  = cursor.endpoint,
+                        api       = cursor.api,
+                        limit     = query.limit,
+                        page      = query.page;
 
-                this.err('failed to find() on shopify.')
-                this.err(err);
+                    if (_.isNumeric(page) && _.isNumeric(limit) && cursor.toArray().length === limit) {
 
-                return new ArrayCursor([], statement);
+                        page = parseInt(page) + 1;
+                        query.page = page;
+
+                        return this.get(api, statement, endpoint, query);
+
+
+                    }
+
+                    return false;
+
+
+                }.bind(this));
 
             }.bind(this));
 
@@ -95,10 +139,22 @@ define(['altair/facades/declare',
 
             return this.promise(api, method || 'post', endpoint, data).then(function (data, headers) {
 
-               var values = data[0][this._keySingular],
-                   item   = this.create(values);
+                if (!data[1] || !data[1].status || (data[1].status !== '200 OK' && data[1].status !== '201 Created')) {
+                    throw new Error(data[1].status);
+                }
 
-                return item;
+                var values = data[0][this._keySingular];
+
+                return values;
+
+            }.bind(this)).otherwise(function (error) {
+
+                if (error.error) {
+                    throw new Error(error.error[this._keySingular] || error.error[this._keyPlural] || error.error.base[0]);
+                }
+
+                //pass through error
+                throw error;
 
             }.bind(this));
 
@@ -128,14 +184,25 @@ define(['altair/facades/declare',
          */
         _find: function (options, q) {
 
-            this.assert(this._findEndpoint, 'you must set a _findEndpoint on your store');
+            var _options = options || {},
+                endpoint = _options.findOne ? this._getEndpoint : this._findEndpoint;
 
-            var api     = options.event.get('shopify'),
+
+            this.assert(endpoint, 'you must set a _findEndpoint and _getEndpoint on your store.');
+
+            var api     = options.shopify || options.event.get('shopify'),
                 clauses = q.clauses(),
-                limit   = clauses.limit || 10,
+                limit   = clauses.limit || 20,
                 page    = clauses.skip + 1 || 1;
 
-            return this.get(api, options.statement, this._findEndpoint, mixin({
+
+            if (_options.findOne && (clauses.where._id || clauses.where.id)) {
+                endpoint = endpoint.replace('{{id}}', clauses.where._id || clauses.where.id).replace('{{_id}}', clauses.where._id || clauses.where.id);
+                delete clauses.where._id;
+                delete clauses.where.id;
+            }
+
+            return this.get(api, options.statement, endpoint, mixin(_options.findOne ? {} : {
                 limit: limit,
                 page: page
             }, clauses.where || {}));
@@ -152,7 +219,7 @@ define(['altair/facades/declare',
         find: function (options) {
 
             //an event is required
-            if (options && options.event && options.event.get('shopify')) {
+            if (options && ((options.event && options.event.get('shopify')) || (options.shopify))) {
 
                 var statement = new Statement(this.hitch('_find', options));
                 options.statement = statement;
@@ -161,7 +228,7 @@ define(['altair/facades/declare',
 
             } else {
 
-                throw new Error('event is required in options for find() to work.');
+                throw new Error('event with shopify or shopify is required in options for find() to work.');
 
             }
 
@@ -176,7 +243,10 @@ define(['altair/facades/declare',
          */
         findOne: function (options) {
 
-            var query = this.find(options);
+            var _options = options || {};
+            _options.findOne = true;
+
+            var query = this.find(_options);
             query.limit(1);
 
             query.on('did-execute', function (e) {
@@ -202,21 +272,32 @@ define(['altair/facades/declare',
                 _config     = config || {},
                 action      = entity.primaryValue() ? 'update' : 'insert',
                 e           = _options.event,
+                properties  = _options.properties,
                 endpoint    = action === 'update' ? this._updateEndpoint : this._createEndpoint,
                 api;
 
             this.assert(endpoint, 'You must set a _createEndpoint && _updateEndpoint');
-            this.assert(e, 'You must pass an event to save({event: e}).');
+            this.assert(entity.shopify || e || _options.shopify, 'You must pass an event or shopify to save({event: e}) or save({ shopify: api }).');
 
-            api = e.get('shopify');
+            api = _options.shopify ||  entity.shopify || e.get('shopify');;
 
             if (_config.action) {
                 action = _config.action;
             }
 
-            this.assert(options && options.event, 'You must pass { event: e } in options.');
+            if (entity.primaryValue()) {
+                endpoint = endpoint.replace('{{id}}', entity.primaryValue()).replace('{{_id}}', entity.primaryValue());
+            }
 
-            return this.all(entity.getValues({}, { methods: ['toDatabaseValue'] })).then(function (values) {
+            return this.all(entity.getValues({}, { methods: ['toShopifyValue', 'toDatabaseValue'] })).then(function (values) {
+
+                //map id
+                values.id = values._id;
+
+                //we only need certain props
+                if (properties) {
+                    values = _.pick(values, properties);
+                }
 
                 return this.parent.emit('liquidfire:Spectre::will-save-entity', {
                     store:      this,
@@ -281,7 +362,9 @@ define(['altair/facades/declare',
                 }
 
                 //the new values should have an Id now
-                entity.mixin(values);
+                if (values) {
+                    entity.mixin(values);
+                }
 
                 this.parent.emit('liquidfire:Spectre::did-save-entity', {
                     store: this,

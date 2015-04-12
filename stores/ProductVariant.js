@@ -8,11 +8,11 @@ define(['altair/facades/declare',
 
     return declare([_Base, Lifecycle], {
 
-        _findEndpoint:  '/admin/metafields.json',
-        _createEndpoint: '/admin/metafields.json',
-        _updateEndpoint: '/admin/metafields/{{id}}.json',
-        _keyPlural:     'metafields',
-        _keySingular:   'metafield',
+        _findEndpoint:  '/admin/products/{{productId}}/variants.json',
+        _createEndpoint: '/admin/products/{{productId}}/variants.json',
+        _updateEndpoint: '/admin/products/{{productId}}/variants/{{id}}.json',
+        _keyPlural:     'variants',
+        _keySingular:   'variant',
 
         startup: function () {
 
@@ -23,14 +23,6 @@ define(['altair/facades/declare',
             return this.inherited(arguments);
         },
 
-        /**
-         * Special find by product
-         *
-         * @param options
-         * @param q
-         * @returns {*}
-         * @private
-         */
         _find: function (options, q) {
 
             var clauses = q.clauses(),
@@ -42,28 +34,18 @@ define(['altair/facades/declare',
                 var id = clauses.where.product.primaryValue ? clauses.where.product.primaryValue() : clauses.where.product;
                 delete clauses.where.product;
 
-                return this.get(api, options.statement, '/admin/products/' + id + '/metafields.json', clauses.where);
+                return this.get(api, options.statement, '/admin/products/' + id + '/variants.json', clauses.where);
 
-            } else if(clauses.where && clauses.where.customer) {
+            } else {
 
-                var id = clauses.where.customer.primaryValue ? clauses.where.customer.primaryValue() : clauses.where.customer;
-                delete clauses.where.customer;
-
-                clauses.where.metafield = {
-                    owner_id: id,
-                    owner_resource: 'customer'
-                };
-
+                return this.inherited(arguments);
 
             }
-
-            return this.inherited(arguments);
 
         },
 
         /**
-         * Endpoints get weird with metafields
-         *
+         * Endpoints get weird with meta fields
          * @param e
          */
         onWillSave: function (e) {
@@ -78,22 +60,27 @@ define(['altair/facades/declare',
                 var product = values.product.primaryValue ? values.product.primaryValue() : values.product;
 
                 if (id) {
-                    endpoint = '/admin/products/' + product + '/metafields/' + id + '.json';
+                    endpoint = '/admin/products/' + product + '/variants/' + id + '.json';
                 } else {
-                    endpoint = '/admin/products/' + product + '/metafields.json'
+                    endpoint = '/admin/products/' + product + '/variants.json'
                 }
 
                 e.set('endpoint', endpoint);
 
-            } else if (values.customer) {
 
-                values.owner_resource = 'customer';
-                values.owner_id       = values.customer;
+            } else {
 
-                delete values.customer;
-                e.set('values', values);
+                if (id) {
+                    endpoint = '/admin/variants/' + id + '.json';
+                } else {
+                    endpoint = '/admin/variants.json'
+                }
+
+                e.set('endpoint', endpoint);
 
             }
+
+
 
         }
 

@@ -22,7 +22,7 @@ $altair l package
 
 {
     "liquidfire:Shopify": {
-        "shopName":         "myshop", 
+         "shopName":        "optional shop name (everything before .myshopify.com)", 
          "apiKey":          "your api key",
          "sharedSecret":    "your shared secret",
          "scope":           "read_content, write_content, read_themes, write_themes, read_products, write_products, read_customers, write_customers, read_orders, write_orders, read_script_tags, write_script_tags, read_fulfillments, write_fulfillments, read_shipping, write_shipping",
@@ -46,11 +46,19 @@ If you are using the [Embedded SDK](http://docs.shopify.com/embedded-app-sdk) yo
 </script>
 ```
 
+### 5. Configure Your Shopify App
+You can configure your app any way you want, but you should match settings for "Embedded Settings" and "App URLs".
+
+-`Embedded Settings`: *Enable*
+-`Application Callback URL`: *http://localhost/shopify*
+-`Preferences URL`: *http://localhost/preferences*
+
 ## Routes
 In order to facilitate the login progress, a few routes are added to Alfred:
 
 * `/shopify` - the login page for your app. Send people here to authenticate them (or install the app on first setup)
 * `/auth` - shopify sends people back here and we finish the auth process
+* `/preferences` - all the settings for your app
 
 ## Events
 Hook into these events in your `App.js` or any `Controller`;
@@ -160,5 +168,78 @@ this.entity('liquidfire:Shopify/entities/Product').then(function (products) {
     
 }.bind(this));
 
+
+```
+## Advanced Per-Shop Preferences
+You may have a bunch of different settings you want each shop to have. Luckily, Apollo makes this really easy.
+All you have to do is provide a schema inside of `modules.json` under `liquidfire:Shopify`.
+
+*Note*: Any change to `preferencesSchema`will require an 'appVersion' change before changes take effect.
+
+### Step 1 - Configure Schema
+```json
+{
+    "liquidfire:Shopify": {
+        "shopName": "myshop",
+        "apiKey":   "...",
+        "appVersion": "0.0.2",
+        "...":      "...",
+        "preferencesSchema": {
+            "properties": {
+                "heading": {
+                    "type": "string",
+                    "options": {
+                        "label": "Heading",
+                    }
+                },
+                "enableEmails": {
+                    "type": "boolean",
+                    "options": {
+                        "label": "Enable Emails"
+                    }
+                }
+            }
+        }
+    }
+}
+
+```
+### Step 3 - Preferences View
+Now to get your preferences to render, create a `./views/shopify/preferences.ejs` and drop this in:
+*Note*: I'm using `AngularJS` in this example, it is optional.
+```html
+<h1>Preferences</h1>
+
+<div ng-controller="PreferencesController">
+    <%- form %>
+</div>
+
+```
+### Step 4 - Loading Preferences
+From inside of a `controller` (or any class) you can do the following to load a shop's settings.
+```js
+{
+    
+    dashboardAction: function (e) {
+    
+        var shopify = e.get('shopify');
+        
+        if (shopify) {
+        
+            return this.model('liquidfire:Shopify/models/Shopify').shopSettings(shopify).then(function (settings) {
+            
+                //everything configured inside of `modules.json`
+                console.log(settings);
+                
+                //the actual preferences the shop has saved for it
+                console.log(settings.values);
+            
+            });
+            
+        }
+    
+    }
+
+}
 
 ```

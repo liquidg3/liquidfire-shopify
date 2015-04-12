@@ -38,46 +38,11 @@ define(['altair/facades/declare',
                 transform: function (entity) {
 
                     //are we pulling in meta fields too?
-                    if (meta) {
-
-                        return this.entity('liquidfire:Shopify/entities/Metafield').then(function (store) {
-
-                            return store.find({ event: e }).where('product', '===', entity).execute();
-
-                        }).then(function (fields) {
-
-                            return this.all({
-                                entity: entity.getHttpResponseValues(e),
-                                fields: _.map(fields.toArray(), function (field) {
-                                    return field.getHttpResponseValues(e);
-                                })
-                            })
-
-                        }.bind(this)).then(function (data) {
-
-                            //take on metafields
-                            var values = data.entity;
-
-                            values.metafields = {};
-
-                            _.each(data.fields, function (field) {
-
-                                if (!values.metafields[field.namespace]) {
-                                    values.metafields[field.namespace] = {};
-                                }
-
-                                values.metafields[field.namespace][field.key] = field.value && field.value_type === 'integer' ? parseInt(field.value) : field.value;
-                            });
-
-                            return values;
-
-                        });
-
-                    } else {
-
-                        return entity.getHttpResponseValues(e);
-
-                    }
+                    return this.all(entity.getHttpResponseValues(e, {
+                        metafields: {
+                            fetch: meta
+                        }
+                    }));
 
                 }.bind(this),
                 findOptions: {
