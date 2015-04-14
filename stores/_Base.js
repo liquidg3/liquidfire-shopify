@@ -115,7 +115,19 @@ define(['altair/facades/declare',
 
                 }.bind(this));
 
-            }.bind(this));
+            }.bind(this)).otherwise(function (err) {
+
+                //404 is not a real error
+                if (err.code && err.code == 404) {
+                    return null;
+                } else if (err.message ) {
+                    throw new Error(err.message);
+                }
+
+                throw err;
+
+
+            });
 
         },
 
@@ -184,24 +196,24 @@ define(['altair/facades/declare',
          */
         _find: function (options, q) {
 
-            var _options = options || {},
-                endpoint = _options.findOne ? this._getEndpoint : this._findEndpoint;
+            var _options    = options || {},
+                api         = options.shopify || options.event.get('shopify'),
+                clauses     = q.clauses(),
+                findOne     = (_options.findOne && (clauses.where._id || clauses.where.id)),
+                limit       = clauses.limit || 20,
+                page        = clauses.skip + 1 || 1,
+                endpoint    = findOne ? this._getEndpoint : this._findEndpoint;
 
             this.assert(endpoint, 'you must set a _findEndpoint and _getEndpoint on your store.');
 
-            var api     = options.shopify || options.event.get('shopify'),
-                clauses = q.clauses(),
-                limit   = clauses.limit || 20,
-                page    = clauses.skip + 1 || 1;
 
-
-            if (_options.findOne && (clauses.where._id || clauses.where.id)) {
+            if (findOne) {
                 endpoint = endpoint.replace('{{id}}', clauses.where._id || clauses.where.id).replace('{{_id}}', clauses.where._id || clauses.where.id);
                 delete clauses.where._id;
                 delete clauses.where.id;
             }
 
-            return this.get(api, options.statement, endpoint, mixin(_options.findOne ? {} : {
+            return this.get(api, options.statement, endpoint, mixin(findOne ? {} : {
                 limit: limit,
                 page: page
             }, clauses.where || {}));

@@ -13,6 +13,23 @@ define(['altair/facades/declare',
             return this.get('default_address', {
                 phone: null
             }).phone;
+        },
+
+        setPhone: function (value) {
+
+            var addresses = this.get('addresses');
+
+            if (!addresses) {
+                addresses = [{
+                }];
+            }
+
+            addresses[0].phone = value;
+            this.set('addresses', addresses);
+
+            return this;
+
+
         }
 
     });
