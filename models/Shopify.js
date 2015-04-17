@@ -110,7 +110,12 @@ define(['altair/facades/declare',
             return this.nexus('cartridges/Database')
                        .findOne('shopify_installs')
                        .where('shop', '===', api.config.shop)
-                       .execute();
+                       .execute().then(function (results) {
+
+
+                    return results;
+
+                });
         },
 
         saveSettings: function (api, settings) {
@@ -126,7 +131,7 @@ define(['altair/facades/declare',
 
                 }.bind(this)).then(function (doc) {
 
-                    this.parent.emit('liquidfire:Shopify::did-save-settings', {
+                    this.parent.emit('did-save-settings', {
                         settings: doc,
                         shopify:  api
                     });

@@ -45,6 +45,22 @@
             }
         },
 
+        "privateAppKey": {
+            "type": "string",
+            "options": {
+                "label": "Private App Key",
+                "description": "Create a new private app and enter the key here and connections will always work to your shop."
+            }
+        },
+
+        "privateAppPassword": {
+            "type": "password",
+            "options": {
+                "label": "Private App Password",
+                "description": "Create a new private app and enter the password here and connections will always work to your shop."
+            }
+        },
+
         "preferencesSchema": {
             "type":    "object",
             "options": {
