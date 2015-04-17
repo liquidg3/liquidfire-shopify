@@ -159,6 +159,10 @@ define(['altair/facades/declare',
             var redirect = request.hostWithProtocol() + _options.redirect_uri;
             _options.redirect_uri = redirect;
 
+            if (this._apiCache[shop]) {
+                return this._apiCache[shop];
+            }
+
             require(['altair/plugins/node!shopify-node-api', 'altair/plugins/node!cookies', 'altair/plugins/node!https'], function (Shopify, Cookies, https) {
 
                 var cookies = request && response ? new Cookies(request.raw(), response.raw()) : null,
@@ -169,112 +173,118 @@ define(['altair/facades/declare',
                     _options.access_token = token;
                 }
 
-                Shopify.prototype.makeRequest = function(endpoint, method, data, callback, retry) {
+                if (!Shopify._beenAugmented) {
 
-                    var dataString = JSON.stringify(data),
-                        options = {
-                            hostname: this.hostname(),
-                            path: endpoint,
-                            method: method.toLowerCase() || 'get',
-                            port: this.port(),
-                            headers: {
-                                'Content-Type': 'application/json'
-                            }
-                        },
-                        self = this;
+                    Shopify._beenAugmented = true;
 
-                    if (this.config.access_token) {
-                        options.headers['X-Shopify-Access-Token'] = this.config.access_token;
-                    }
+                    Shopify.prototype.makeRequest = function(endpoint, method, data, callback, retry) {
 
-                    if (options.method === 'post' || options.method === 'put' || options.method === 'delete') {
-                        options.headers['Content-Length'] = new Buffer(dataString).length;
-                    }
+                        var dataString = JSON.stringify(data),
+                            options = {
+                                hostname: this.hostname(),
+                                path: endpoint,
+                                method: method.toLowerCase() || 'get',
+                                port: this.port(),
+                                headers: {
+                                    'Content-Type': 'application/json'
+                                }
+                            },
+                            self = this;
 
-                    if (this.config.privateKey && this.config.privatePass) {
-                        options.auth = this.config.privateKey + ':' + this.config.privatePass;
-                    }
-
-                    var request = https.request(options, function(response){
-                        self.conditional_console_log( 'STATUS: ' + response.statusCode );
-                        self.conditional_console_log( 'HEADERS: ' + JSON.stringify(response.headers) );
-
-                        if (response.headers && response.headers.http_x_shopify_shop_api_call_limit) {
-                            self.conditional_console_log( 'API_LIMIT: ' + response.headers.http_x_shopify_shop_api_call_limit);
+                        if (this.config.access_token) {
+                            options.headers['X-Shopify-Access-Token'] = this.config.access_token;
                         }
 
-                        response.setEncoding('utf8');
+                        if (options.method === 'post' || options.method === 'put' || options.method === 'delete') {
+                            options.headers['Content-Length'] = new Buffer(dataString).length;
+                        }
 
-                        var body = '';
+                        if (this.config.privateKey && this.config.privatePass) {
+                            options.auth = this.config.privateKey + ':' + this.config.privatePass;
+                            delete options.headers['X-Shopify-Access-Token'];
+                        }
 
-                        response.on('data', function(chunk){
-                            self.conditional_console_log( 'BODY: ' + chunk );
-                            body += chunk;
-                        });
+                        var request = https.request(options, function(response){
+                            self.conditional_console_log( 'STATUS: ' + response.statusCode );
+                            self.conditional_console_log( 'HEADERS: ' + JSON.stringify(response.headers) );
 
-                        response.on('end', function(){
-
-                            var delay = 0;
-
-                            // If the request is being rate limited by Shopify, try again after a delay
-                            if (response.statusCode === 429) {
-                                return setTimeout(function() {
-                                    self.makeRequest(endpoint, method, data, callback);
-                                }, self.config.rate_limit_delay || 10000 );
+                            if (response.headers && response.headers.http_x_shopify_shop_api_call_limit) {
+                                self.conditional_console_log( 'API_LIMIT: ' + response.headers.http_x_shopify_shop_api_call_limit);
                             }
 
-                            // If the backoff limit is reached, add a delay before executing callback function
-                            if (response.statusCode === 200 && self.has_header(response, 'http_x_shopify_shop_api_call_limit')) {
-                                var api_limit = parseInt(response.headers['http_x_shopify_shop_api_call_limit'].split('/')[0], 10);
-                                if (api_limit >= (self.config.backoff || 35)) delay = self.config.backoff_delay || 1000; // in ms
-                            }
+                            response.setEncoding('utf8');
 
-                            setTimeout(function(){
+                            var body = '';
 
-                                var   json = {}
-                                    , error;
+                            response.on('data', function(chunk){
+                                self.conditional_console_log( 'BODY: ' + chunk );
+                                body += chunk;
+                            });
 
-                                try {
-                                    if (body.trim() != '') { //on some requests, Shopify retuns an empty body (several spaces)
-                                        json = JSON.parse(body);
-                                        if (json.hasOwnProperty('error') || json.hasOwnProperty('errors')) {
-                                            error = {
-                                                error : (json.error || json.errors)
-                                                , code  : response.statusCode
-                                            };
-                                        }
-                                    }
-                                } catch(e) {
-                                    error = e;
+                            response.on('end', function(){
+
+                                var delay = 0;
+
+                                // If the request is being rate limited by Shopify, try again after a delay
+                                if (response.statusCode === 429) {
+                                    return setTimeout(function() {
+                                        self.makeRequest(endpoint, method, data, callback);
+                                    }, self.config.rate_limit_delay || 10000 );
                                 }
 
-                                callback(error, json, response.headers);
-                            }, delay); // Delay the callback if we reached the backoff limit
+                                // If the backoff limit is reached, add a delay before executing callback function
+                                if (response.statusCode === 200 && self.has_header(response, 'http_x_shopify_shop_api_call_limit')) {
+                                    var api_limit = parseInt(response.headers['http_x_shopify_shop_api_call_limit'].split('/')[0], 10);
+                                    if (api_limit >= (self.config.backoff || 35)) delay = self.config.backoff_delay || 1000; // in ms
+                                }
+
+                                setTimeout(function(){
+
+                                    var   json = {}
+                                        , error;
+
+                                    try {
+                                        if (body.trim() != '') { //on some requests, Shopify retuns an empty body (several spaces)
+                                            json = JSON.parse(body);
+                                            if (json.hasOwnProperty('error') || json.hasOwnProperty('errors')) {
+                                                error = {
+                                                    error : (json.error || json.errors)
+                                                    , code  : response.statusCode
+                                                };
+                                            }
+                                        }
+                                    } catch(e) {
+                                        error = e;
+                                    }
+
+                                    callback(error, json, response.headers);
+                                }, delay); // Delay the callback if we reached the backoff limit
+
+                            });
 
                         });
 
-                    });
+                        request.on('error', function(e){
+                            self.conditional_console_log( "Request Error: ", e );
+                            if(self.config.retry_errors && !retry){
+                                var delay = self.config.error_retry_delay || 10000;
+                                self.conditional_console_log( "retrying once in " + delay + " milliseconds" );
+                                setTimeout(function() {
+                                    self.makeRequest(endpoint, method, data, callback, true);
+                                }, delay );
+                            } else{
+                                callback(e);
+                            }
+                        });
 
-                    request.on('error', function(e){
-                        self.conditional_console_log( "Request Error: ", e );
-                        if(self.config.retry_errors && !retry){
-                            var delay = self.config.error_retry_delay || 10000;
-                            self.conditional_console_log( "retrying once in " + delay + " milliseconds" );
-                            setTimeout(function() {
-                                self.makeRequest(endpoint, method, data, callback, true);
-                            }, delay );
-                        } else{
-                            callback(e);
+                        if (options.method === 'post' || options.method === 'put' || options.method === 'delete') {
+                            request.write(dataString);
                         }
-                    });
 
-                    if (options.method === 'post' || options.method === 'put' || options.method === 'delete') {
-                        request.write(dataString);
-                    }
+                        request.end();
 
-                    request.end();
-
-                };
+                    };
+                }
 
                 api = new Shopify(_options);
 
