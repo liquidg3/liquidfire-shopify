@@ -298,6 +298,8 @@ define(['altair/facades/declare',
                 this._apiCache[shop + '.myshopify.com']                = api;
                 this._apiCache[shop]                                   = api;
 
+                api.config.access_token = api.config.access_token || true;
+
             }
 
             this.emit('did-build-api', {

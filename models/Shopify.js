@@ -146,14 +146,13 @@ define(['altair/facades/declare',
         isInstalled: function (api) {
 
             //have we been installed yet?
-            return this.shopSettings(api.config.shop)
+            return this.shopSettings(api)
                        .then(function (doc) {
 
                            return !!doc;
 
 
-                       })
-                       .otherwise(fail);
+                       });
 
         },
 
