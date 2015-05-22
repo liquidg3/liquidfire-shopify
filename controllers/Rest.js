@@ -32,6 +32,7 @@ define(['altair/facades/declare',
         products: function (e) {
 
             var request = e.get('request'),
+                count   = request.get('count', false),
                 meta    = request.get('metafields', false);
 
             return this._search.findFromEvent('liquidfire:Shopify/entities/Product', e, {
@@ -46,8 +47,10 @@ define(['altair/facades/declare',
 
                 }.bind(this),
                 findOptions: {
-                    event: e
-                }
+                    event: e,
+                    count: count
+                },
+
             }).then(function (results) {
                 return results;
             });

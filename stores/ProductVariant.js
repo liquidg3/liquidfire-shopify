@@ -1,14 +1,15 @@
 define(['altair/facades/declare',
-        './_Base',
-        'altair/Lifecycle',
-        'altair/cartridges/database/Statement',
-        'altair/cartridges/database/cursors/Array',
+    './_Base',
+    'altair/Lifecycle',
+    'altair/cartridges/database/Statement',
+    'altair/cartridges/database/cursors/Array',
 ], function (declare, _Base, Lifecycle, Statement, ArrayCursor) {
 
 
     return declare([_Base, Lifecycle], {
 
         _findEndpoint:  '/admin/products/{{productId}}/variants.json',
+        _getEndpoint:    '/admin/variants/{{id}}.json',
         _createEndpoint: '/admin/products/{{productId}}/variants.json',
         _updateEndpoint: '/admin/products/{{productId}}/variants/{{id}}.json',
         _keyPlural:     'variants',

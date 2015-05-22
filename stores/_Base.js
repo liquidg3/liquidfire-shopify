@@ -15,6 +15,7 @@ define(['altair/facades/declare',
         _keyPlural:     null,
         _createEndpoint: null,
         _updateEndpoint: null,
+        _countEndpoint: null,
 
         /**
          * Serialize an object into a query string
@@ -58,9 +59,11 @@ define(['altair/facades/declare',
          * @param query
          * @returns {*}
          */
-        get: function (api, statement, endpoint, query) {
+        get: function (api, statement, endpoint, query, options) {
 
-            var _endpoint = endpoint;
+            var _endpoint   = endpoint,
+                _options    = options || {},
+                raw         = !!_options.raw;
 
             if (query) {
 
@@ -78,6 +81,12 @@ define(['altair/facades/declare',
             statement.query    = query;
 
             return this.promise(api, 'get', _endpoint).then(function (data, headers) {
+
+                if (raw) {
+                    return [
+                        data, headers
+                    ];
+                }
 
                 var items = [],
                     results = data[0][this._keySingular] ? [data[0][this._keySingular]] : data[0][this._keyPlural] || [];
@@ -201,11 +210,12 @@ define(['altair/facades/declare',
                 clauses     = q.clauses(),
                 findOne     = (_options.findOne && (clauses.where._id || clauses.where.id)),
                 limit       = clauses.limit || 20,
-                page        = clauses.skip + 1 || 1,
-                endpoint    = findOne ? this._getEndpoint : this._findEndpoint;
+                page        = clauses.skip > 0 ? Math.ceil((clauses.skip + 1) / limit) : 1,
+                count       = !!_options.count,
+                endpoint    = findOne ? this._getEndpoint : this._findEndpoint,
+                query;
 
             this.assert(endpoint, 'you must set a _findEndpoint and _getEndpoint on your store.');
-
 
             if (findOne) {
                 endpoint = endpoint.replace('{{id}}', clauses.where._id || clauses.where.id).replace('{{_id}}', clauses.where._id || clauses.where.id);
@@ -213,10 +223,24 @@ define(['altair/facades/declare',
                 delete clauses.where.id;
             }
 
-            return this.get(api, options.statement, endpoint, mixin(findOne ? {} : {
+            query = mixin(findOne ? {} : {
                 limit: limit,
                 page: page
-            }, clauses.where || {}));
+            }, clauses.where || {});
+
+            return this.all({
+                count: count ? this.get(api, options.statement, this._countEndpoint, clauses.where, { raw: true } ) : false,
+                cursor: this.get(api, options.statement, endpoint, query)
+            }).then(function (response) {
+
+                if (count && response.count) {
+                    response.cursor.setTotal(response.count[0][0].count);
+                }
+
+                return response.cursor;
+
+
+            });
 
         },
 

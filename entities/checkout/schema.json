@@ -1,0 +1,208 @@
+{
+    "name": "Custom Collection",
+    "tableName": "shopify_custom_collections",
+    "properties": {
+        "_id": {
+            "type": "primary",
+            "options": {
+                "label": "Id",
+                "type": "integer"
+            }
+        },
+        "created_at": {
+            "type": "date",
+            "options": {
+                "label": "Created At"
+            }
+        },
+        "updated_at": {
+            "type": "date",
+            "options": {
+                "label": "Updated At"
+            }
+        },
+        "abandoned_checkout_url": {
+            "type": "string",
+            "options": {
+                "label": "Continue Checkout URL"
+            }
+        },
+        "billing_address": {
+            "type": "object",
+            "options": {
+                "label": "Billing Address"
+            }
+        },
+        "buyer_accepts_marketing": {
+            "type": "boolean",
+            "options": {
+                "label": "Body HTML"
+            }
+        },
+        "cancel_reason": {
+            "type": "string",
+            "options": {
+                "label": "Cancel Reason"
+            }
+        },
+        "cart_token": {
+            "type": "string",
+            "options": {
+                "label": "Cart Token"
+            }
+        },
+        "closed_at": {
+            "type": "date",
+            "options": {
+                "label": "Closed At"
+            }
+        },
+        "completed_at": {
+            "type": "date",
+            "options": {
+                "label": "Completed At"
+            }
+        },
+        "currency": {
+            "type": "string",
+            "options": {
+                "label": "Currency"
+            }
+        },
+        "customer": {
+            "type": "object",
+            "options": {
+                "label": "Customer"
+            }
+        },
+        "discount_codes": {
+            "type": "string",
+            "options": {
+                "label": "Discount Codes",
+                "many": true
+            }
+        },
+        "email": {
+            "type": "string",
+            "options": {
+                "label": "Email"
+            }
+        },
+
+        "gateway": {
+            "type": "string",
+            "options": {
+                "label": "Gateway"
+            }
+        },
+        "landing_site": {
+            "type": "string",
+            "options": {
+                "label": "Landing Site"
+            }
+        },
+        "line_items": {
+            "type": "object",
+            "options": {
+                "label": "Line Items",
+                "many": true
+            }
+        },
+
+        "note": {
+            "type": "string",
+            "options": {
+                "label": "Note"
+            }
+        },
+        "referring_site": {
+            "type": "string",
+            "options": {
+                "label": "Referring Site"
+            }
+        },
+
+        "shipping_address": {
+            "type": "object",
+            "options": {
+                "label": "Shipping Address"
+            }
+        },
+        "shipping_lines": {
+            "type": "object",
+            "options": {
+                "label": "Shipping Lines",
+                "many": true
+            }
+        },
+        "source_name": {
+            "type": "string",
+            "options": {
+                "label": "Source Name"
+            }
+        },
+
+        "subtotal_price": {
+            "type": "float",
+            "options": {
+                "label": "Subtotal Price"
+            }
+        },
+
+        "tax_lines": {
+            "type": "object",
+            "options": {
+                "label": "Tax Lines",
+                "many": true
+            }
+        },
+
+        "taxes_included": {
+            "type": "boolean",
+            "options": {
+                "label": "Tax includes"
+            }
+        },
+
+        "token": {
+            "type": "string",
+            "options": {
+                "label": "Token"
+            }
+        },
+
+        "total_discounts": {
+            "type": "float",
+            "options": {
+                "label": "Total Discounts"
+            }
+        },
+
+        "total_line_items_price": {
+            "type": "float",
+            "options": {
+                "label": "Line Items Price"
+            }
+        },
+
+        "total_price": {
+            "type": "float",
+            "options": {
+                "label": "Total Price"
+            }
+        },
+
+        "total_tax": {
+            "type": "float",
+            "options": {
+                "label": "Total Tax"
+            }
+        },
+        "total_weight": {
+            "type": "float",
+            "options": {
+                "label": "Total Weight"
+            }
+        }
+    }
+}

@@ -20,12 +20,14 @@ define(['altair/facades/declare',
 
             return this.parent.emit('will-install', {
                 api:            api,
+                shopify:        api,
                 shop:           api.config.shop,
                 requestEvent:   e
             }).then(function () {
 
                 return this.parent.emit('install', {
                     api:            api,
+                    shopify:        api,
                     shop:           api.config.shop,
                     requestEvent:   e
                 });
@@ -34,15 +36,18 @@ define(['altair/facades/declare',
 
                 return this.parent.emit('did-install', {
                     api:            api,
+                    shopify:        api,
                     shop:           api.config.shop,
                     requestEvent:   e
-                })
+                });
 
             }.bind(this)).then(function () {
 
                 //save record of install
                 return this.nexus('cartridges/Database').create('shopify_installs').set({
                     shop:               api.config.shop,
+                    api:                api,
+                    shopify:            api,
                     appVersion:         this.parent.get('appVersion'),
                     preferencesSchema:  this.parent.get('preferencesSchema')
                 }).execute();
@@ -80,6 +85,7 @@ define(['altair/facades/declare',
 
                 return this.parent.emit('did-update', {
                     api:            api,
+                    shopify:        api,
                     shop:           api.config.shop,
                     old:            old,
                     requestEvent:   e
@@ -108,9 +114,9 @@ define(['altair/facades/declare',
         shopSettings: function (api) {
 
             return this.nexus('cartridges/Database')
-                       .findOne('shopify_installs')
-                       .where('shop', '===', api.config.shop)
-                       .execute().then(function (results) {
+                .findOne('shopify_installs')
+                .where('shop', '===', api.config.shop)
+                .execute().then(function (results) {
 
 
                     return results;
@@ -121,11 +127,11 @@ define(['altair/facades/declare',
         saveSettings: function (api, settings) {
 
             return this.nexus('cartridges/Database')
-                       .update('shopify_installs')
-                       .set(settings)
-                       .where('shop', '===', api.config.shop)
-                       .execute()
-                       .then(function () {
+                .update('shopify_installs')
+                .set(settings)
+                .where('shop', '===', api.config.shop)
+                .execute()
+                .then(function () {
 
                     return this.shopSettings(api);
 
@@ -147,12 +153,12 @@ define(['altair/facades/declare',
 
             //have we been installed yet?
             return this.shopSettings(api)
-                       .then(function (doc) {
+                .then(function (doc) {
 
-                           return !!doc;
+                    return !!doc;
 
 
-                       });
+                });
 
         },
 

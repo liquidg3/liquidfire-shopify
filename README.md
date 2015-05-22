@@ -130,7 +130,7 @@ onDidReceiveRequest: function (e) {
 ## REST endpoints
 The following endpoints are available to you for your convenience. They mostly map 1-for-1 with [Shopify's own API](http://docs.shopify.com/api).
 
-`/v1/rest/shopify/products.json` - all products. See [Shopify API](http://docs.shopify.com/api/product/) for details.
+`/v1/rest/shopify/products.json` - all products. See [Shopify API](http://docs.shopify.com/api/product/) for details. Uses [Spectre's Searh Model](https://github.com/liquidg3/liquidfire-spectre) for easy search power!
 
 
 ## Working with Shopify Objects
