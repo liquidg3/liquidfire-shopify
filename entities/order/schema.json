@@ -278,6 +278,12 @@
             "options": {
                 "label": "Metafields"
             }
+        },
+        "user_id": {
+            "type": "integer",
+            "options": {
+                "label": "User ID"
+            }
         }
     }
 }

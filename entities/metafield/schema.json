@@ -102,6 +102,14 @@
                 "label": "Customer",
                 "entity": "liquidfire:Shopify/entities/Customer"
             }
+        },
+
+        "variant": {
+            "type":    "entity",
+            "options": {
+                "label": "Product Variant",
+                "entity": "liquidfire:Shopify/entities/ProductVariant"
+            }
         }
 
 

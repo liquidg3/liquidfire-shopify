@@ -34,15 +34,22 @@ define(['altair/facades/declare',
         _find: function (options, q) {
 
             var clauses = q.clauses(),
-                api     = options.shopify || options.event.get('shopify');
+                api     = options.shopify || options.event.get('shopify'),
+                go      = function (key) {
+
+                    var id = clauses.where[key].primaryValue ? clauses.where[key].primaryValue() : clauses.where[key];
+                    delete clauses.where[key];
+
+                    return this.get(api, options.statement, '/admin/' + key + 's/' + id + '/metafields.json', clauses.where);
+
+                }.bind(this);
+
 
             //if we are searching by product, search changes
             if (clauses.where && clauses.where.product) {
 
-                var id = clauses.where.product.primaryValue ? clauses.where.product.primaryValue() : clauses.where.product;
-                delete clauses.where.product;
+                return go('product');
 
-                return this.get(api, options.statement, '/admin/products/' + id + '/metafields.json', clauses.where);
 
             } else if(clauses.where && clauses.where.customer) {
 
@@ -55,6 +62,16 @@ define(['altair/facades/declare',
                 };
 
 
+            } else if (clauses.where && clauses.where.order) {
+
+                return go('order');
+
+            } else if (clauses.where && clauses.where.variant) {
+
+                return go('variant');
+
+            } else {
+                throw new Error('No metafield logic for this use case.');
             }
 
             return this.inherited(arguments);
@@ -91,6 +108,14 @@ define(['altair/facades/declare',
                 values.owner_id       = values.customer;
 
                 delete values.customer;
+                e.set('values', values);
+
+            } else if (values.variant) {
+
+                values.owner_resource = 'variant';
+                values.owner_id       = values.variant;
+
+                delete values.variant;
                 e.set('values', values);
 
             }

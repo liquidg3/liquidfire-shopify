@@ -36,6 +36,12 @@ define(['altair/facades/declare',
 
         },
 
+        upsertMetafieldOnProductVariant: function (api, variant, values) {
+
+            return this.upsertMetafieldOnEntity('variant', api, variant, values);
+
+        },
+
         /**
          * Add meta field to a product once.
          *
@@ -46,8 +52,8 @@ define(['altair/facades/declare',
          */
         upsertMetafieldOnEntity: function (type, api, entity, values) {
 
-            var key = values.key,
-                namespace = values.namespace;
+            var key         = values.key,
+                namespace   = values.namespace;
 
             this.assert(key, 'You must pass a key in your values');
             this.assert(namespace, 'You must pass a namespace in your values');
@@ -78,7 +84,9 @@ define(['altair/facades/declare',
                     field.mixin(values);
                 }
 
-                field.set(type, entity);
+                if(field.has(type)) {
+                    field.set(type, entity);
+                }
 
                 return field.save();
 

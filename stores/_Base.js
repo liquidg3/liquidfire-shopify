@@ -171,7 +171,7 @@ define(['altair/facades/declare',
             }.bind(this)).otherwise(function (error) {
 
                 if (error.error) {
-                    throw new Error(error.error[this._keySingular] || error.error[this._keyPlural] || error.error.base[0]);
+                    throw new Error(error.error[this._keySingular] || error.error[this._keyPlural] || error.error['metafields.key'] || error.error[Object.keys(error.error)] || error.error.base[0]);
                 }
 
                 //pass through error
@@ -286,7 +286,9 @@ define(['altair/facades/declare',
 
             query.on('did-execute', function (e) {
                 var results = e.get('results');
-                e.set('results', results.toArray()[0]);
+                if (results) {
+                    e.set('results', results.toArray()[0]);
+                }
             });
 
             return query;
