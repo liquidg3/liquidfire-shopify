@@ -208,7 +208,7 @@ define(['altair/facades/declare',
             var _options    = options || {},
                 api         = options.shopify || options.event.get('shopify'),
                 clauses     = q.clauses(),
-                findOne     = (_options.findOne && (clauses.where._id || clauses.where.id)),
+                findOne     = _options.findOne,
                 limit       = clauses.limit || 20,
                 page        = clauses.skip > 0 ? Math.ceil((clauses.skip + 1) / limit) : 1,
                 count       = !!_options.count,
@@ -230,7 +230,7 @@ define(['altair/facades/declare',
 
             return this.all({
                 count: count ? this.get(api, options.statement, this._countEndpoint, clauses.where, { raw: true } ) : false,
-                cursor: this.get(api, options.statement, endpoint, query)
+                cursor: this.get(api, options.statement, endpoint, query, _options)
             }).then(function (response) {
 
                 if (count && response.count) {

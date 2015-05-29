@@ -1,6 +1,6 @@
 {
     "name":         "liquidfire:Shopify",
-    "version":      "0.0.9",
+    "version":      "0.0.10",
     "description":  "Create a Shopify app real easy like.",
     "events": {
         "will-install": "Your app is about to install",
