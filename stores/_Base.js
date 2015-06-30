@@ -171,7 +171,8 @@ define(['altair/facades/declare',
             }.bind(this)).otherwise(function (error) {
 
                 if (error.error) {
-                    throw new Error(error.error[this._keySingular] || error.error[this._keyPlural] || error.error['metafields.key'] || error.error[Object.keys(error.error)] || error.error.base[0]);
+                    this.err('Shopify ' + (method || 'post') + ' failed', data);
+                    throw new Error(error.error[this._keySingular] || error.error[this._keyPlural] || error.error['metafields.key'] || Object.keys(error.error)[0] + ' ' + error.error[Object.keys(error.error)[0]] || error.error.base[0]);
                 }
 
                 //pass through error

@@ -9,6 +9,8 @@ define(['altair/facades/declare',
 
     return declare([_DeferredMixin, _AssertMixin, Emitter], {
 
+        _entitiesByShop: {}, //caching
+        _settingsByShop: {},
 
         /**
          * Installs an app.
@@ -46,8 +48,6 @@ define(['altair/facades/declare',
                 //save record of install
                 return this.nexus('cartridges/Database').create('shopify_installs').set({
                     shop:               api.config.shop,
-                    api:                api,
-                    shopify:            api,
                     appVersion:         this.parent.get('appVersion'),
                     preferencesSchema:  this.parent.get('preferencesSchema')
                 }).execute();
@@ -105,46 +105,109 @@ define(['altair/facades/declare',
 
         },
 
+        clearCache: function (api) {
+
+            delete this._settingsByShop[api.config.shop];
+            delete this._entitiesByShop[api.config.shop];
+
+        },
+
         /**
-         * Load all the settings/preferences from your shop
+         * Load all the settings/preferences from your shop. Normalized and cleaned through Apollo
          *
          * @param api
          * @returns {*}
          */
         shopSettings: function (api) {
 
-            return this.nexus('cartridges/Database')
-                .findOne('shopify_installs')
-                .where('shop', '===', api.config.shop)
-                .execute().then(function (results) {
+            if (!this._settingsByShop[api.config.shop]) {
+
+                this._settingsByShop[api.config.shop] = this.nexus('cartridges/Database')
+                    .findOne('shopify_installs')
+                    .where('shop', '===', api.config.shop)
+                    .execute().then(function (results) {
+
+                        var entity = this._settingsEntity(api, results);
+                        entity.mixin(results.values);
+
+                        return this.all({
+                            settings: results,
+                            entity: entity,
+                            values: this.all(entity.getValues({}, { findOptions: { shopify: api } }))
+                        });
 
 
-                    return results;
+                    }.bind(this)).then(function (results) {
 
-                });
-        },
+                        var settings    = results.settings;
 
-        saveSettings: function (api, settings) {
+                        settings.entity = results.entity;
+                        settings.values = results.values;
 
-            return this.nexus('cartridges/Database')
-                .update('shopify_installs')
-                .set(settings)
-                .where('shop', '===', api.config.shop)
-                .execute()
-                .then(function () {
+                        return settings;
 
-                    return this.shopSettings(api);
-
-                }.bind(this)).then(function (doc) {
-
-                    this.parent.emit('did-save-settings', {
-                        settings: doc,
-                        shopify:  api
                     });
 
-                    return doc;
+            }
 
-                }.bind(this));;
+            return this._settingsByShop[api.config.shop];
+        },
+
+        _settingsEntity: function (api, settings) {
+
+            if (!this._settingsEntity[api.config.shop]) {
+
+                var apollo      = this.nexus('cartridges/Apollo'),
+                    schema      = apollo.createSchema(settings && settings.preferencesSchema || this.parent.options.preferencesSchema),
+                    entity      = this.parent.forgeSync('support/Settings', null, { type: 'entity' });
+
+                entity.setSchema(schema);
+
+                this._settingsEntity[api.config.shop] = entity;
+
+            }
+
+            return this._settingsEntity[api.config.shop];
+
+
+        },
+
+        saveSettings: function (api, changes, options) {
+
+            var _options = options || {},
+                entity   = this._settingsEntity(api);
+
+            return this.shopSettings(api).then(function (settings) {
+
+                settings.entity.mixin(changes);
+
+                return settings.entity.validate();
+
+            }).then(function (entity) {
+
+                var values = entity.getValues(options, { methods: ['toDatabaseValue']});
+
+                return this.nexus('cartridges/Database')
+                    .update('shopify_installs')
+                    .set('values', values)
+                    .where('shop', '===', api.config.shop)
+                    .execute();
+
+
+            }.bind(this)).then(function (doc) {
+
+                this.clearCache(api);
+
+                if (_options.emit !== false) {
+
+                    this.parent.emit('did-save-settings', {
+                        shopify:  api
+                    });
+                }
+
+                return this.shopSettings(api);
+
+            }.bind(this));
 
 
         },

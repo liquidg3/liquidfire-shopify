@@ -59,12 +59,6 @@
                 "label": "Last Name"
             }
         },
-        "metafield": {
-            "type": "object",
-            "options": {
-                "label": "Metafields"
-            }
-        },
         "multipass_identifier": {
             "type": "string",
             "options": {
