@@ -1,16 +1,16 @@
 define(['altair/facades/declare',
-        'liquidfire/modules/spectre/db/Store',
-        'altair/cartridges/database/Statement',
-        'altair/cartridges/database/cursors/Array',
-        'altair/mixins/_AssertMixin',
-        'lodash',
-        'altair/facades/mixin'
+    'liquidfire/modules/spectre/db/Store',
+    'altair/cartridges/database/Statement',
+    'altair/cartridges/database/cursors/Array',
+    'altair/mixins/_AssertMixin',
+    'lodash',
+    'altair/facades/mixin'
 ], function (declare, Store, Statement, ArrayCursor, _AssertMixin, _, mixin) {
 
 
     return declare([Store, _AssertMixin], {
 
-
+        _hitRequestLimit: false,
         _findEndpoint:  null,
         _keyPlural:     null,
         _createEndpoint: null,
@@ -82,6 +82,28 @@ define(['altair/facades/declare',
 
             return this.promise(api, 'get', _endpoint).then(function (data, headers) {
 
+
+                if (data && data[1]) {
+
+
+                    if (this._hitRequestLimit) {
+
+                        this._hitRequestLimit = false;
+                        this.warn('receiving requests once again ', data[1].http_x_shopify_shop_api_call_limit);
+
+                    }
+
+
+                    if (data[1].http_x_shopify_shop_api_call_limit === '40/40') {
+
+                        this._hitRequestLimit = true;
+                        this.warn('hit shopify request limit ', data[1].http_x_shopify_shop_api_call_limit);
+
+                    }
+
+
+                }
+
                 if (raw) {
                     return [
                         data, headers
@@ -130,13 +152,14 @@ define(['altair/facades/declare',
                 if (err.code && err.code == 404) {
                     return null;
                 } else if (err.message ) {
+                    this.err('call to', _endpoint, 'failed');
                     throw new Error(err.message);
                 }
 
                 throw err;
 
 
-            });
+            }.bind(this));
 
         },
 
@@ -172,7 +195,7 @@ define(['altair/facades/declare',
 
                 if (error.error) {
                     this.err('Shopify ' + (method || 'post') + ' failed', data);
-                    throw new Error(error.error[this._keySingular] || error.error[this._keyPlural] || error.error['metafields.key'] || Object.keys(error.error)[0] + ' ' + error.error[Object.keys(error.error)[0]] || error.error.base[0]);
+                    throw new Error(error.error[this._keySingular] || error.error[this._keyPlural] || error.error['metafields.key'] || error.error && Object.keys(error.error)[0] + ' ' + error.error[Object.keys(error.error)[0]] || error.error.base[0]);
                 }
 
                 //pass through error
