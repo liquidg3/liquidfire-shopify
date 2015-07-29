@@ -10,12 +10,12 @@
  */
 
 define(['altair/facades/declare',
-        'altair/Lifecycle',
-        'altair/mixins/_AssertMixin',
-        'apollo/_HasSchemaMixin',
-        'altair/events/Emitter',
-        'altair/facades/mixin',
-        'lodash'
+    'altair/Lifecycle',
+    'altair/mixins/_AssertMixin',
+    'apollo/_HasSchemaMixin',
+    'altair/events/Emitter',
+    'altair/facades/mixin',
+    'lodash'
 ], function (declare,
              Lifecycle,
              _AssertMixin,
@@ -118,7 +118,7 @@ define(['altair/facades/declare',
 
                 //copy back routes (this ensures the angular routes are first)
                 _.each(routes, function (route, key) {
-                   options.routes[key] = route;
+                    options.routes[key] = route;
                 });
 
             } else {
@@ -135,29 +135,31 @@ define(['altair/facades/declare',
          */
         api: function (e, options) {
 
-            this.assert(e, 'You must pass an event with a valid request to api().');
-
             var api,
-                request     = e.get('request'),
-                response    = e.get('response'),
+                request     = e && e.get('request'),
+                response    = e && e.get('response'),
                 shop        = this.get('shopName'),
                 fullShop    = shop,
                 _options    = mixin({
-                shop:                   shop,
-                privateKey:             this.get('privateAppKey'),
-                privatePass:            this.get('privateAppPassword'),
-                shopify_api_key:        this.get('apiKey'),
-                shopify_shared_secret:  this.get('sharedSecret'),
-                shopify_scope:          this.get('scope'),
-                redirect_uri:           '/shopify/auth',
-                verbose:                false,
-                preferences_schema:     this.get('preferencesSchema')
-            }, options || {});
+                    shop:                   shop,
+                    privateKey:             this.get('privateAppKey'),
+                    privatePass:            this.get('privateAppPassword'),
+                    shopify_api_key:        this.get('apiKey'),
+                    shopify_shared_secret:  this.get('sharedSecret'),
+                    shopify_scope:          this.get('scope'),
+                    redirect_uri:           '/shopify/auth',
+                    verbose:                false,
+                    preferences_schema:     this.get('preferencesSchema')
+                }, options || {});
 
 
             //drop in domain and protocol
-            var redirect = request.hostWithProtocol() + _options.redirect_uri;
-            _options.redirect_uri = redirect;
+            if (request) {
+
+                var redirect = request.hostWithProtocol() + _options.redirect_uri;
+                _options.redirect_uri = redirect;
+
+            }
 
             if (this._apiCache[shop]) {
                 return this._apiCache[shop];

@@ -10,12 +10,19 @@ define(['altair/facades/declare',
 
     return declare([Store, _AssertMixin], {
 
-        _hitRequestLimit: false,
-        _findEndpoint:  null,
-        _keyPlural:     null,
-        _createEndpoint: null,
-        _updateEndpoint: null,
-        _countEndpoint: null,
+        _hitRequestLimit:       false,
+        _findEndpoint:          null,
+        _keyPlural:             null,
+        _createEndpoint:        null,
+        _updateEndpoint:        null,
+        _countEndpoint:         null,
+        _getCache:              null,
+        _getCacheTimeouts:      null,
+
+        constructor: function () {
+            this._getCache = {};
+            this._getCacheTimeouts = {};
+        },
 
         /**
          * Serialize an object into a query string
@@ -80,7 +87,17 @@ define(['altair/facades/declare',
             statement.api      = api;
             statement.query    = query;
 
-            return this.promise(api, 'get', _endpoint).then(function (data, headers) {
+            if (this._getCache[_endpoint]) {
+                return this._getCache[_endpoint];
+            }
+
+            if (!this._getCacheTimeouts[_endpoint]) {
+                this._getCacheTimeouts[_endpoint] = setTimeout(function () {
+                    delete this._getCache[_endpoint];
+                }.bind(this), 1000 * 60 * 2); //clear cache in 2 minutes
+            }
+
+            this._getCache[_endpoint] = this.promise(api, 'get', _endpoint).then(function (data, headers) {
 
 
                 if (data && data[1]) {
@@ -161,6 +178,9 @@ define(['altair/facades/declare',
 
             }.bind(this));
 
+
+            return this._getCache[_endpoint];
+
         },
 
         /**
@@ -240,6 +260,7 @@ define(['altair/facades/declare',
                 query;
 
             this.assert(endpoint, 'you must set a _findEndpoint and _getEndpoint on your store.');
+
 
             if (findOne) {
                 endpoint = endpoint.replace('{{id}}', clauses.where._id || clauses.where.id).replace('{{_id}}', clauses.where._id || clauses.where.id);
