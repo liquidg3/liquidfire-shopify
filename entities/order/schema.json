@@ -94,7 +94,7 @@
             }
         },
         "discount_codes": {
-            "type": "string",
+            "type": "object",
             "options": {
                 "label": "Discount Codes",
                 "many": true

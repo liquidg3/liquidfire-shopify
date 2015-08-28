@@ -94,6 +94,7 @@ define(['altair/facades/declare',
             if (!this._getCacheTimeouts[_endpoint]) {
                 this._getCacheTimeouts[_endpoint] = setTimeout(function () {
                     delete this._getCache[_endpoint];
+                    this._getCacheTimeouts[_endpoint] = false;
                 }.bind(this), 1000 * 60 * 2); //clear cache in 2 minutes
             }
 
@@ -200,6 +201,9 @@ define(['altair/facades/declare',
                 endpoint += endpoint.indexOf('?') === -1 ? '?' : '&';
                 endpoint += this.serialize(query);
             }
+
+            //clear out all cache since we've posted something
+            this._getCache = {};
 
             return this.promise(api, method || 'post', endpoint, data).then(function (data, headers) {
 
