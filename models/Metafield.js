@@ -21,7 +21,7 @@ define(['altair/facades/declare',
 
             }.bind(this));
 
-            this.inherited(arguments);
+            return this.inherited(arguments);
         },
 
         upsertMetafieldOnProduct: function (api, product, values) {
