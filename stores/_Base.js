@@ -87,18 +87,18 @@ define(['altair/facades/declare',
             statement.api      = api;
             statement.query    = query;
 
-            if (this._getCache[_endpoint]) {
-                return this._getCache[_endpoint];
-            }
+            //if (this._getCache[_endpoint]) {
+            //    return this._getCache[_endpoint];
+            //}
+            //
+            //if (!this._getCacheTimeouts[_endpoint]) {
+            //    this._getCacheTimeouts[_endpoint] = setTimeout(function () {
+            //        delete this._getCache[_endpoint];
+            //        this._getCacheTimeouts[_endpoint] = false;
+            //    }.bind(this), 1000 * 60 * 2); //clear cache in 2 minutes
+            //}
 
-            if (!this._getCacheTimeouts[_endpoint]) {
-                this._getCacheTimeouts[_endpoint] = setTimeout(function () {
-                    delete this._getCache[_endpoint];
-                    this._getCacheTimeouts[_endpoint] = false;
-                }.bind(this), 1000 * 60 * 2); //clear cache in 2 minutes
-            }
-
-            this._getCache[_endpoint] = this.promise(api, 'get', _endpoint).then(function (data, headers) {
+            return this.promise(api, 'get', _endpoint).then(function (data, headers) {
 
 
                 if (data && data[1]) {
@@ -180,7 +180,7 @@ define(['altair/facades/declare',
             }.bind(this));
 
 
-            return this._getCache[_endpoint];
+            //return this._getCache[_endpoint];
 
         },
 
@@ -266,10 +266,14 @@ define(['altair/facades/declare',
             this.assert(endpoint, 'you must set a _findEndpoint and _getEndpoint on your store.');
 
 
-            if (findOne) {
+            if (findOne && clauses.where._id) {
                 endpoint = endpoint.replace('{{id}}', clauses.where._id || clauses.where.id).replace('{{_id}}', clauses.where._id || clauses.where.id);
                 delete clauses.where._id;
                 delete clauses.where.id;
+            }
+            //basic search does not need the id in the url
+            else if (findOne && !clauses.where._id) {
+                endpoint = endpoint.replace('/{{id}}', '');
             }
 
             query = mixin(findOne ? {} : {

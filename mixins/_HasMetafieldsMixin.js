@@ -1,7 +1,7 @@
 define(['altair/facades/declare',
-        'altair/mixins/_DeferredMixin',
-        'altair/mixins/_AssertMixin',
-        'lodash'
+    'altair/mixins/_DeferredMixin',
+    'altair/mixins/_AssertMixin',
+    'lodash'
 ], function (declare,
              _DeferredMixin,
              _AssertMixin,
@@ -12,14 +12,21 @@ define(['altair/facades/declare',
         _metaFieldPredicate: false,
         getMetafields: function (defaultValue, options, config) {
 
-            var value   = this._get('metafields', defaultValue, options, config),
-                _config = config || {},
+            var _config = config || {},
                 _options = options || {},
+                value,
+                toShopifyValue = _config.methods && _config.methods[0] === 'toShopifyValue',
                 shopify = _config.shopify || this.shopify;
 
-            _config.shopify = shopify;
+            //only do many if we are sending to shopify
+            _options.many = toShopifyValue;
+            value = this._get('metafields', defaultValue, _options, config),
 
-            if (value) {
+                _config.shopify = shopify;
+
+            //if we are going to shopify, simply return the value, otherwise, only return
+            //if it's a promise
+            if (toShopifyValue || value) {
 
                 return value;
 

@@ -12,16 +12,8 @@ define(['altair/facades/declare',
         _store: null, //metafield store
         startup: function () {
 
-            this.deferred = this.all({
-                _store: this.entity('liquidfire:Shopify/entities/Metafield')
-            }).then(function (deps) {
-
-                declare.safeMixin(this, deps);
-                return this;
-
-            }.bind(this));
-
-            return this.inherited(arguments);
+            this._store = this.entitySync('liquidfire:Shopify/entities/Metafield');
+            return this;
         },
 
         upsertMetafieldOnProduct: function (api, product, values) {
@@ -92,9 +84,7 @@ define(['altair/facades/declare',
 
             }.bind(this));
 
-        },
-
-
+        }
 
     });
 
