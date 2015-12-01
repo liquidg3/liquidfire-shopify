@@ -87,22 +87,22 @@ define(['altair/facades/declare',
             statement.api      = api;
             statement.query    = query;
 
-            //if (this._getCache[_endpoint]) {
-            //    return this._getCache[_endpoint];
-            //}
-            //
-            //if (!this._getCacheTimeouts[_endpoint]) {
-            //    this._getCacheTimeouts[_endpoint] = setTimeout(function () {
-            //        delete this._getCache[_endpoint];
-            //        this._getCacheTimeouts[_endpoint] = false;
-            //    }.bind(this), 1000 * 60 * 2); //clear cache in 2 minutes
-            //}
+            if (this._getCache[_endpoint]) {
+                return this._getCache[_endpoint];
+            }
 
-            return this.promise(api, 'get', _endpoint).then(function (data, headers) {
+            if (this._getCacheTimeouts[_endpoint]) {
+                clearTimeout(this._getCacheTimeouts[_endpoint]);
+            }
 
+            this._getCacheTimeouts[_endpoint] = setTimeout(function () {
+                delete this._getCache[_endpoint];
+                this._getCacheTimeouts[_endpoint] = false;
+            }.bind(this), 1000 * 60 * 2); //clear cache in 2 minutes
+
+            this._getCache[_endpoint] = this.promise(api, 'get', _endpoint).then(function (data, headers) {
 
                 if (data && data[1]) {
-
 
                     if (this._hitRequestLimit) {
 
@@ -110,7 +110,6 @@ define(['altair/facades/declare',
                         this.warn('receiving requests once again ', data[1].http_x_shopify_shop_api_call_limit);
 
                     }
-
 
                     if (data[1].http_x_shopify_shop_api_call_limit === '40/40') {
 
@@ -166,21 +165,24 @@ define(['altair/facades/declare',
 
             }.bind(this)).otherwise(function (err) {
 
+                //clear cache
+                this._getCache[_endpoint] = false;
+
                 //404 is not a real error
                 if (err.code && err.code == 404) {
                     return null;
-                } else if (err.message ) {
-                    this.err('call to', _endpoint, 'failed');
-                    throw new Error(err.message);
+                } else if (err.message) {
+                    this.err('call to ', _endpoint, ' failed');
+                    throw err;
                 }
 
-                throw err;
 
+                throw err;
 
             }.bind(this));
 
 
-            //return this._getCache[_endpoint];
+            return this._getCache[_endpoint];
 
         },
 

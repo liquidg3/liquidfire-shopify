@@ -67,6 +67,14 @@
                 "label":       "Preferences Schema",
                 "description":     "How the preferences form will render for a shop."
             }
+        },
+
+        "localAddress": {
+            "type":    "string",
+            "options": {
+                "label":       "Local Address",
+                "description": "Change the IP address requests to Shopify originate from."
+            }
         }
     }
 }

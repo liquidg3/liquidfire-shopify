@@ -149,6 +149,7 @@ define(['altair/facades/declare',
                     shopify_scope:          this.get('scope'),
                     redirect_uri:           '/shopify/auth',
                     verbose:                false,
+                    localAddress:           this.get('localAddress'),
                     preferences_schema:     this.get('preferencesSchema')
                 }, options || {});
 
@@ -192,6 +193,11 @@ define(['altair/facades/declare',
                                 }
                             },
                             self = this;
+
+                        //local address override
+                        if (_options.localAddress) {
+                            options.localAddress = _options.localAddress;
+                        }
 
                         if (this.config.access_token) {
                             options.headers['X-Shopify-Access-Token'] = this.config.access_token;
