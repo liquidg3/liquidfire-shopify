@@ -174,6 +174,12 @@ define(['altair/facades/declare',
                 } else if (err.message) {
                     this.err('call to ', _endpoint, ' failed');
                     throw err;
+                } else if(_.isString(err)) {
+                    this.err('call to ', _endpoint, ' failed');
+                    throw new Error(err);
+                } else if(_.isObject(err)) {
+                    this.err('call to ', _endpoint, ' failed');
+                    throw new Error(JSON.stringify(err));
                 }
 
 
