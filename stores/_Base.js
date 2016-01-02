@@ -19,6 +19,8 @@ define(['altair/facades/declare',
         _getCache:              null,
         _getCacheTimeouts:      null,
 
+        _maxLimit:  250, //most amout of records returned at once
+
         constructor: function () {
             this._getCache = {};
             this._getCacheTimeouts = {};
@@ -70,6 +72,7 @@ define(['altair/facades/declare',
 
             var _endpoint   = endpoint,
                 _options    = options || {},
+                limit       = -1,
                 raw         = !!_options.raw;
 
             if (query) {
@@ -77,6 +80,12 @@ define(['altair/facades/declare',
                 if (query._id) {
                     query.id = query._id;
                     delete query._id;
+                }
+
+                if (query.limit) {
+                    limit           = query.limit;
+                    statement.limit = limit;
+                    query.limit     = Math.min(query.limit, this._maxLimit);
                 }
 
                 _endpoint += _endpoint.indexOf('?') === -1 ? '?' : '&';
@@ -142,16 +151,18 @@ define(['altair/facades/declare',
                 return new ArrayCursor(items, statement, undefined, function (cursor) {
 
                     var statement = cursor.statement(),
-                        query     = cursor.query,
-                        endpoint  = cursor.endpoint,
-                        api       = cursor.api,
+                        query     = statement.query,
+                        endpoint  = statement.endpoint,
+                        api       = statement.api,
+                        originalLimit = statement.limit,
                         limit     = query.limit,
                         page      = query.page;
 
-                    if (_.isNumeric(page) && _.isNumeric(limit) && cursor.toArray().length === limit) {
+                    if (_.isNumber(page) && _.isNumber(limit) && (limit * page) < originalLimit && cursor.toArray().length === limit) {
 
                         page = parseInt(page) + 1;
                         query.page = page;
+                        query.limit = originalLimit;
 
                         return this.get(api, statement, endpoint, query);
 
