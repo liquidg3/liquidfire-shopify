@@ -1,11 +1,12 @@
 define(['altair/facades/declare',
+    'altair/Lifecycle',
     'liquidfire/modules/spectre/db/Store',
     'altair/cartridges/database/Statement',
     'altair/cartridges/database/cursors/Array',
     'altair/mixins/_AssertMixin',
     'lodash',
     'altair/facades/mixin'
-], function (declare, Store, Statement, ArrayCursor, _AssertMixin, _, mixin) {
+], function (declare, Lifecycle, Store, Statement, ArrayCursor, _AssertMixin, _, mixin) {
 
 
     return declare([Store, _AssertMixin], {
@@ -16,14 +17,19 @@ define(['altair/facades/declare',
         _createEndpoint:        null,
         _updateEndpoint:        null,
         _countEndpoint:         null,
-        _getCache:              null,
         _getCacheTimeouts:      null,
 
         _maxLimit:  250, //most amout of records returned at once
+        _cacheHolder:           null,
 
-        constructor: function () {
-            this._getCache = {};
-            this._getCacheTimeouts = {};
+        startup: function () {
+
+            this._cacheHolder                       = this.nexus('liquidfire:Shopify');
+            this._cacheHolder._getCache             = {};
+            this._cacheHolder._getCacheTimeouts     = {};
+
+            return this;
+
         },
 
         /**
@@ -96,20 +102,20 @@ define(['altair/facades/declare',
             statement.api      = api;
             statement.query    = query;
 
-            if (this._getCache[_endpoint]) {
-                return this._getCache[_endpoint];
+            if (this._cacheHolder._getCache[_endpoint]) {
+                return this._cacheHolder._getCache[_endpoint];
             }
 
-            if (this._getCacheTimeouts[_endpoint]) {
-                clearTimeout(this._getCacheTimeouts[_endpoint]);
+            if (this._cacheHolder._getCacheTimeouts[_endpoint]) {
+                clearTimeout(this._cacheHolder._getCacheTimeouts[_endpoint]);
             }
 
-            this._getCacheTimeouts[_endpoint] = setTimeout(function () {
-                delete this._getCache[_endpoint];
-                this._getCacheTimeouts[_endpoint] = false;
+            this._cacheHolder._getCacheTimeouts[_endpoint] = setTimeout(function () {
+                delete this._cacheHolder._getCache[_endpoint];
+                this._cacheHolder._getCacheTimeouts[_endpoint] = false;
             }.bind(this), 1000 * 60 * 2); //clear cache in 2 minutes
 
-            this._getCache[_endpoint] = this.promise(api, 'get', _endpoint).then(function (data, headers) {
+            this._cacheHolder._getCache[_endpoint] = this.promise(api, 'get', _endpoint).then(function (data, headers) {
 
                 if (data && data[1]) {
 
@@ -177,7 +183,7 @@ define(['altair/facades/declare',
             }.bind(this)).otherwise(function (err) {
 
                 //clear cache
-                this._getCache[_endpoint] = false;
+                this._cacheHolder._getCache[_endpoint] = false;
 
                 //404 is not a real error
                 if (err.code && err.code == 404) {
@@ -199,7 +205,7 @@ define(['altair/facades/declare',
             }.bind(this));
 
 
-            return this._getCache[_endpoint];
+            return this._cacheHolder._getCache[_endpoint];
 
         },
 
@@ -222,7 +228,7 @@ define(['altair/facades/declare',
             }
 
             //clear out all cache since we've posted something
-            this._getCache = {};
+            this._cacheHolder._getCache = {};
 
             return this.promise(api, method || 'post', endpoint, data).then(function (data, headers) {
 

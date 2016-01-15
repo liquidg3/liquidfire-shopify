@@ -1,12 +1,11 @@
 define(['altair/facades/declare',
         './_Base',
-        'altair/Lifecycle',
         'altair/cartridges/database/Statement',
         'altair/cartridges/database/cursors/Array',
-], function (declare, _Base, Lifecycle, Statement, ArrayCursor) {
+], function (declare, _Base, Statement, ArrayCursor) {
 
 
-    return declare([_Base, Lifecycle], {
+    return declare([_Base], {
 
         _findEndpoint:  '/admin/metafields.json',
         _createEndpoint: '/admin/metafields.json',

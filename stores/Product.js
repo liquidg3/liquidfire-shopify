@@ -1,10 +1,9 @@
 define(['altair/facades/declare',
-    'altair/Lifecycle',
-    './_Base'
-], function (declare, Lifecycle, _Base) {
+        './_Base'
+], function (declare, _Base) {
 
 
-    return declare([_Base, Lifecycle], {
+    return declare([_Base], {
 
         _findEndpoint:      '/admin/products.json',
         _createEndpoint:    '/admin/products.json',
