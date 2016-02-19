@@ -16,8 +16,8 @@
         "did-build-api": "Anytime a shopify api instance is instantiated for a particular shop."
     },
     "dependencies": {
-        "shopify-node-api": ">=1.4.x",
-        "cookies": ">=0.5.x"
+        "shopify-node-api": "~1.5.1",
+        "cookies": "~0.5.0"
     },
     "altairDependencies": {
         "titan:Alfred": ">=0.1.x"
