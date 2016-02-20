@@ -1,0 +1,109 @@
+{
+    "name": "Custom Collection",
+    "tableName": "shopify_custom_collections",
+    "properties": {
+        "_id": {
+            "type": "primary",
+            "options": {
+                "label": "Id",
+                "type": "integer"
+            }
+        },
+        "created_at": {
+            "type": "date",
+            "options": {
+                "label": "Created At"
+            }
+        },
+        "updated_at": {
+            "type": "date",
+            "options": {
+                "label": "Updated At"
+            }
+        },
+        "amount": {
+            "type": "float",
+            "options": {
+                "label": "Amount"
+            }
+        },
+        "authorization": {
+            "type": "string",
+            "options": {
+                "label": "Authorization"
+            }
+        },
+        "device_id": {
+            "type": "string",
+            "options": {
+                "label": "Device ID"
+            }
+        },
+        "gateway": {
+            "type": "string",
+            "options": {
+                "label": "Gateway"
+            }
+        },
+        "source_name": {
+            "type": "string",
+            "options": {
+                "label": "String"
+            }
+        },
+        "payment_details": {
+            "type": "object",
+            "options": {
+                "label": "Payment Details"
+            }
+        },
+        "kind": {
+            "type": "string",
+            "options": {
+                "label": "Kind"
+            }
+        },
+        "order_id": {
+            "type": "integer",
+            "options": {
+                "label": "Order ID"
+            }
+        },
+        "receipt": {
+            "type": "object",
+            "options": {
+                "label": "Receipt"
+            }
+        },
+        "error_code": {
+            "type": "string",
+            "options": {
+                "label": "Error Code"
+            }
+        },
+        "status": {
+            "type": "string",
+            "options": {
+                "label": "Status"
+            }
+        },
+        "test": {
+            "type": "boolean",
+            "options": {
+                "label": "Test"
+            }
+        },
+        "currency": {
+            "type": "string",
+            "options": {
+                "label": "Currency"
+            }
+        },
+        "user_id": {
+            "type": "integer",
+            "options": {
+                "label": "User ID"
+            }
+        }
+    }
+}

@@ -285,7 +285,7 @@ define(['altair/facades/declare',
                 limit       = clauses.limit || 20,
                 page        = clauses.skip > 0 ? Math.ceil((clauses.skip + 1) / limit) : 1,
                 count       = !!_options.count,
-                endpoint    = findOne ? this._getEndpoint : this._findEndpoint,
+                endpoint    = _options.endpoint ? _options.endpoint : findOne ? this._getEndpoint : this._findEndpoint,
                 query;
 
             this.assert(endpoint, 'you must set a _findEndpoint and _getEndpoint on your store.');

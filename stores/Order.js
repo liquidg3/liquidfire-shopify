@@ -6,7 +6,7 @@ define(['altair/facades/declare',
     return declare([_Base], {
 
         _findEndpoint:      '/admin/orders.json',
-        _getEndpoint:       '/admin/order/{{_id}}.json',
+        _getEndpoint:       '/admin/orders/{{_id}}.json',
         _keyPlural:         'orders',
         _keySingular:       'order',
         _createEndpoint:    '/admin/orders.json',
