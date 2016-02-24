@@ -115,7 +115,9 @@ define(['altair/facades/declare',
                 this._cacheHolder._getCacheTimeouts[_endpoint] = false;
             }.bind(this), 1000 * 60 * 2); //clear cache in 2 minutes
 
-            this._cacheHolder._getCache[_endpoint] = this.promise(api, 'get', _endpoint).then(function (data, headers) {
+            var promise = this.promise(api, 'get', _endpoint).then(function (data, headers) {
+
+                this._cacheHolder._getCache[_endpoint] = promise;
 
                 if (data && data[1]) {
 
@@ -205,7 +207,7 @@ define(['altair/facades/declare',
             }.bind(this));
 
 
-            return this._cacheHolder._getCache[_endpoint];
+            return promise;
 
         },
 
