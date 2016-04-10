@@ -1,4 +1,5 @@
-define(['altair/facades/declare',
+define([
+    'altair/facades/declare',
     'altair/mixins/_DeferredMixin',
     'altair/events/Emitter',
     'altair/mixins/_AssertMixin'
@@ -21,35 +22,37 @@ define(['altair/facades/declare',
         install: function (api, e) {
 
             return this.parent.emit('will-install', {
-                api:            api,
-                shopify:        api,
-                shop:           api.config.shop,
-                requestEvent:   e
+                api: api,
+                shopify: api,
+                shop: api.config.shop,
+                requestEvent: e
             }).then(function () {
 
                 return this.parent.emit('install', {
-                    api:            api,
-                    shopify:        api,
-                    shop:           api.config.shop,
-                    requestEvent:   e
+                    api: api,
+                    shopify: api,
+                    shop: api.config.shop,
+                    requestEvent: e
                 });
 
             }.bind(this)).then(function () {
 
                 return this.parent.emit('did-install', {
-                    api:            api,
-                    shopify:        api,
-                    shop:           api.config.shop,
-                    requestEvent:   e
+                    api: api,
+                    shopify: api,
+                    shop: api.config.shop,
+                    requestEvent: e
                 });
 
             }.bind(this)).then(function () {
 
+                this.clearCache(api);
+
                 //save record of install
                 return this.nexus('cartridges/Database').create('shopify_installs').set({
-                    shop:               api.config.shop,
-                    appVersion:         this.parent.get('appVersion'),
-                    preferencesSchema:  this.parent.get('preferencesSchema')
+                    shop: api.config.shop,
+                    appVersion: this.parent.get('appVersion'),
+                    preferencesSchema: this.parent.get('preferencesSchema')
                 }).execute();
 
 
@@ -68,35 +71,37 @@ define(['altair/facades/declare',
         update: function (api, old, e) {
 
             return this.parent.emit('will-update', {
-                api:            api,
-                shop:           api.config.shop,
-                old:            old,
-                requestEvent:   e
+                api: api,
+                shop: api.config.shop,
+                old: old,
+                requestEvent: e
             }).then(function () {
 
                 return this.parent.emit('update', {
-                    api:            api,
-                    shop:           api.config.shop,
-                    old :           old,
-                    requestEvent:   e
+                    api: api,
+                    shop: api.config.shop,
+                    old: old,
+                    requestEvent: e
                 });
 
             }.bind(this)).then(function () {
 
                 return this.parent.emit('did-update', {
-                    api:            api,
-                    shopify:        api,
-                    shop:           api.config.shop,
-                    old:            old,
-                    requestEvent:   e
+                    api: api,
+                    shopify: api,
+                    shop: api.config.shop,
+                    old: old,
+                    requestEvent: e
                 })
 
             }.bind(this)).then(function () {
 
+                this.clearCache(api);
+
                 //save record of install
                 return this.nexus('cartridges/Database').update('shopify_installs').set({
-                    appVersion:         this.parent.get('appVersion'),
-                    preferencesSchema:  this.parent.get('preferencesSchema')
+                    appVersion: this.parent.get('appVersion'),
+                    preferencesSchema: this.parent.get('preferencesSchema')
                 }).where('shop', '===', api.config.shop).execute();
 
 
@@ -127,19 +132,23 @@ define(['altair/facades/declare',
                     .where('shop', '===', api.config.shop)
                     .execute().then(function (results) {
 
+                        if (!results) {
+                            throw new Error('shop is not installed!');
+                        }
+
                         var entity = this._settingsEntity(api, results);
                         entity.mixin(results.values);
 
                         return this.all({
                             settings: results,
                             entity: entity,
-                            values: this.all(entity.getValues({}, { findOptions: { shopify: api } }))
+                            values: this.all(entity.getValues({}, {findOptions: {shopify: api}}))
                         });
 
 
                     }.bind(this)).then(function (results) {
 
-                        var settings    = results.settings;
+                        var settings = results.settings;
 
                         settings.entity = results.entity;
                         settings.values = results.values;
@@ -157,9 +166,9 @@ define(['altair/facades/declare',
 
             if (!this._settingsEntity[api.config.shop]) {
 
-                var apollo      = this.nexus('cartridges/Apollo'),
-                    schema      = apollo.createSchema(settings && settings.preferencesSchema || this.parent.options.preferencesSchema),
-                    entity      = this.parent.forgeSync('support/Settings', null, { type: 'entity' });
+                var apollo = this.nexus('cartridges/Apollo'),
+                    schema = apollo.createSchema(settings && settings.preferencesSchema || this.parent.options.preferencesSchema),
+                    entity = this.parent.forgeSync('support/Settings', null, {type: 'entity'});
 
                 entity.setSchema(schema);
 
@@ -175,7 +184,7 @@ define(['altair/facades/declare',
         saveSettings: function (api, changes, options) {
 
             var _options = options || {},
-                entity   = this._settingsEntity(api);
+                entity = this._settingsEntity(api);
 
             return this.shopSettings(api).then(function (settings) {
 
@@ -185,7 +194,7 @@ define(['altair/facades/declare',
 
             }).then(function (entity) {
 
-                var values = entity.getValues(options, { methods: ['toDatabaseValue']});
+                var values = entity.getValues(options, {methods: ['toDatabaseValue']});
 
                 return this.nexus('cartridges/Database')
                     .update('shopify_installs')
@@ -201,9 +210,11 @@ define(['altair/facades/declare',
                 if (_options.emit !== false) {
 
                     this.parent.emit('did-save-settings', {
-                        shopify:  api
+                        shopify: api
                     });
                 }
+
+                this.clearCache(api);
 
                 return this.shopSettings(api);
 
@@ -235,16 +246,16 @@ define(['altair/facades/declare',
         fetchToken: function (e) {
 
             var cookies = e.get('cookies')
-            var token =  cookies && cookies.get('shopify');
+            var token = cookies && cookies.get('shopify');
 
             return token;
         },
 
         redirectToShopifyAuth: function (e) {
 
-            var api         = this.parent.api(e),
-                url         = api.buildAuthURL(),
-                response    = e.get('response');
+            var api = this.parent.api(e),
+                url = api.buildAuthURL(),
+                response = e.get('response');
 
             //stop the request from finishing and the layout from rendering
             e.stopPropagation();
