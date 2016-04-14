@@ -117,8 +117,6 @@ define(['altair/facades/declare',
 
             var promise = this.promise(api, 'get', _endpoint).then(function (data, headers) {
 
-                this._cacheHolder._getCache[_endpoint] = promise;
-
                 if (data && data[1]) {
 
                     if (this._hitRequestLimit) {
@@ -205,6 +203,8 @@ define(['altair/facades/declare',
                 throw err;
 
             }.bind(this));
+
+            this._cacheHolder._getCache[_endpoint] = promise;
 
 
             return promise;
