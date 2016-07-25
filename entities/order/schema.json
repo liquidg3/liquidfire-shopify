@@ -118,6 +118,12 @@
                 "label": "Fulfillments"
             }
         },
+        "refunds": {
+            "type": "object",
+            "options": {
+                "label": "Refunds"
+            }
+        },
         "fulfillment_status": {
             "type": "string",
             "options": {

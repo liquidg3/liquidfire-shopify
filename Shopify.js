@@ -150,7 +150,8 @@ define(['altair/facades/declare',
                     redirect_uri:           '/shopify/auth',
                     verbose:                false,
                     localAddress:           this.get('localAddress'),
-                    preferences_schema:     this.get('preferencesSchema')
+                    preferences_schema:     this.get('preferencesSchema'),
+                    nonce:                  this.get('nonce')
                 }, options || {});
 
 

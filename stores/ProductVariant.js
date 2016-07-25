@@ -2,7 +2,8 @@ define(['altair/facades/declare',
     './_Base',
     'altair/cartridges/database/Statement',
     'altair/cartridges/database/cursors/Array',
-], function (declare, _Base, Statement, ArrayCursor) {
+    'altair/facades/mixin'
+], function (declare, _Base, Statement, ArrayCursor, mixin) {
 
 
     return declare([_Base], {
@@ -31,10 +32,19 @@ define(['altair/facades/declare',
             //if we are searching by product, search changes
             if (clauses.where && clauses.where.product) {
 
-                var id = clauses.where.product.primaryValue ? clauses.where.product.primaryValue() : clauses.where.product;
+                var id = clauses.where.product.primaryValue ? clauses.where.product.primaryValue() : clauses.where.product,
+                    clauses     = q.clauses(),
+                    limit       = clauses.limit || 20,
+                    page        = clauses.skip > 0 ? Math.ceil((clauses.skip + 1) / limit) : 1;
+
                 delete clauses.where.product;
 
-                return this.get(api, options.statement, '/admin/products/' + id + '/variants.json', clauses.where);
+                var query = mixin({
+                    limit: limit,
+                    page: page
+                }, clauses.where || {});
+
+                return this.get(api, options.statement, '/admin/products/' + id + '/variants.json', query);
 
             } else {
 

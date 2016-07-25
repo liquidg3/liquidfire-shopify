@@ -75,6 +75,13 @@
                 "label":       "Local Address",
                 "description": "Change the IP address requests to Shopify originate from."
             }
+        },
+        "nonce": {
+            "type": "string",
+            "options": {
+                "label": "Nonce",
+                "description": "For the state check passed back and forth with shopify."
+            }
         }
     }
 }
