@@ -110,6 +110,13 @@
                 "label": "Product Variant",
                 "entity": "liquidfire:Shopify/entities/ProductVariant"
             }
+        },
+        "order": {
+            "type":    "entity",
+            "options": {
+                "label": "Order",
+                "entity": "liquidfire:Shopify/entities/Order"
+            }
         }
 
 

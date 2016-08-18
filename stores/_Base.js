@@ -11,22 +11,22 @@ define(['altair/facades/declare',
 
     return declare([Store, _AssertMixin], {
 
-        _hitRequestLimit:       false,
-        _findEndpoint:          null,
-        _keyPlural:             null,
-        _createEndpoint:        null,
-        _updateEndpoint:        null,
-        _countEndpoint:         null,
-        _getCacheTimeouts:      null,
+        _hitRequestLimit: false,
+        _findEndpoint: null,
+        _keyPlural: null,
+        _createEndpoint: null,
+        _updateEndpoint: null,
+        _countEndpoint: null,
+        _getCacheTimeouts: null,
 
-        _maxLimit:  250, //most amout of records returned at once
-        _cacheHolder:           null,
+        _maxLimit: 250, //most amout of records returned at once
+        _cacheHolder: null,
 
         startup: function () {
 
-            this._cacheHolder                       = this.nexus('liquidfire:Shopify');
-            this._cacheHolder._getCache             = {};
-            this._cacheHolder._getCacheTimeouts     = {};
+            this._cacheHolder = this.nexus('liquidfire:Shopify');
+            this._cacheHolder._getCache = {};
+            this._cacheHolder._getCacheTimeouts = {};
 
             return this;
 
@@ -39,9 +39,9 @@ define(['altair/facades/declare',
          * @param prefix
          * @returns {string}
          */
-        serialize:  function(obj, prefix) {
+        serialize: function (obj, prefix) {
             var str = [];
-            for(var p in obj) {
+            for (var p in obj) {
                 if (obj.hasOwnProperty(p)) {
                     var k = prefix ? prefix + "[" + p + "]" : p, v = obj[p];
                     str.push(typeof v == "object" ?
@@ -76,10 +76,10 @@ define(['altair/facades/declare',
          */
         get: function (api, statement, endpoint, query, options) {
 
-            var _endpoint   = endpoint,
-                _options    = options || {},
-                limit       = -1,
-                raw         = !!_options.raw;
+            var _endpoint = endpoint,
+                _options = options || {},
+                limit = -1,
+                raw = !!_options.raw;
 
             if (query) {
 
@@ -89,9 +89,9 @@ define(['altair/facades/declare',
                 }
 
                 if (query.limit) {
-                    limit           = query.limit;
+                    limit = query.limit;
                     statement.limit = limit;
-                    query.limit     = Math.min(query.limit, this._maxLimit);
+                    query.limit = Math.min(query.limit, this._maxLimit);
                 }
 
                 _endpoint += _endpoint.indexOf('?') === -1 ? '?' : '&';
@@ -99,8 +99,8 @@ define(['altair/facades/declare',
             }
 
             statement.endpoint = endpoint;
-            statement.api      = api;
-            statement.query    = query;
+            statement.api = api;
+            statement.query = query;
 
             if (this._cacheHolder._getCache[_endpoint]) {
                 return this._cacheHolder._getCache[_endpoint];
@@ -157,12 +157,12 @@ define(['altair/facades/declare',
                 return new ArrayCursor(items, statement, undefined, function (cursor) {
 
                     var statement = cursor.statement(),
-                        query     = statement.query,
-                        endpoint  = statement.endpoint,
-                        api       = statement.api,
+                        query = statement.query,
+                        endpoint = statement.endpoint,
+                        api = statement.api,
                         originalLimit = statement.limit,
-                        limit     = query.limit,
-                        page      = query.page;
+                        limit = query.limit,
+                        page = query.page;
 
                     if (_.isNumber(page) && _.isNumber(limit) && (limit * page) < originalLimit && cursor.toArray().length === limit) {
 
@@ -191,10 +191,10 @@ define(['altair/facades/declare',
                 } else if (err.message) {
                     this.err('call to ', _endpoint, ' failed');
                     throw err;
-                } else if(_.isString(err)) {
+                } else if (_.isString(err)) {
                     this.err('call to ', _endpoint, ' failed');
                     throw new Error(err);
-                } else if(_.isObject(err)) {
+                } else if (_.isObject(err)) {
                     this.err('call to ', _endpoint, ' failed');
                     throw new Error(JSON.stringify(err));
                 }
@@ -232,10 +232,12 @@ define(['altair/facades/declare',
             //clear out all cache since we've posted something
             this._cacheHolder._getCache = {};
 
-            return this.promise(api, method || 'post', endpoint, data).then(function (data, headers) {
+            var m = method || 'post';
 
-                if (!data[1] || !data[1].status || (data[1].status !== '200 OK' && data[1].status !== '201 Created')) {
-                    throw new Error(data[1].status);
+            return this.promise(api, m, endpoint, data).then(function (data) {
+
+                if (data[1].statusCode < 200 || data[1].statusCode > 299) {
+                    throw new Error('received status "' + data[1].statusCode + '" from ' + m + ' to ' + endpoint);
                 }
 
                 var values = data[0][this._keySingular];
@@ -245,8 +247,8 @@ define(['altair/facades/declare',
             }.bind(this)).otherwise(function (error) {
 
                 if (error.error) {
-                    this.err('Shopify ' + (method || 'post') + ' failed', data);
-                    throw new Error(error.error[this._keySingular] || error.error[this._keyPlural] || error.error['metafields.key'] || error.error && Object.keys(error.error)[0] + ' ' + error.error[Object.keys(error.error)[0]] || error.error.base[0]);
+                    this.err('Shopify ' + (method || 'post') + ' failed', error, data);
+                    throw new Error(error.error || error.error[this._keySingular] || error.error[this._keyPlural] || error.error['metafields.key'] || error.error && Object.keys(error.error)[0] + ' ' + error.error[Object.keys(error.error)[0]] || error.error.base[0]);
                 }
 
                 //pass through error
@@ -271,6 +273,17 @@ define(['altair/facades/declare',
         },
 
         /**
+         * Delete something in shopify
+         *
+         * @param api
+         * @param endpoint
+         * @returns {*}
+         */
+        'delete': function (api, endpoint) {
+            return this.post(api, endpoint, null, null, 'delete');
+        },
+
+        /**
          * Find callback.
          *
          * @param options
@@ -280,14 +293,14 @@ define(['altair/facades/declare',
          */
         _find: function (options, q) {
 
-            var _options    = options || {},
-                api         = options.shopify || options.event.get('shopify'),
-                clauses     = q.clauses(),
-                findOne     = _options.findOne,
-                limit       = clauses.limit || 20,
-                page        = clauses.skip > 0 ? Math.ceil((clauses.skip + 1) / limit) : 1,
-                count       = !!_options.count,
-                endpoint    = _options.endpoint ? _options.endpoint : findOne ? this._getEndpoint : this._findEndpoint,
+            var _options = options || {},
+                api = options.shopify || options.event.get('shopify'),
+                clauses = q.clauses(),
+                findOne = _options.findOne,
+                limit = clauses.limit || 20,
+                page = clauses.skip > 0 ? Math.ceil((clauses.skip + 1) / limit) : 1,
+                count = !!_options.count,
+                endpoint = _options.endpoint ? _options.endpoint : findOne ? this._getEndpoint : this._findEndpoint,
                 query;
 
             this.assert(endpoint, 'you must set a _findEndpoint and _getEndpoint on your store.');
@@ -309,7 +322,7 @@ define(['altair/facades/declare',
             }, clauses.where || {});
 
             return this.all({
-                count: count ? this.get(api, options.statement, this._countEndpoint, clauses.where, { raw: true } ) : false,
+                count: count ? this.get(api, options.statement, this._countEndpoint, clauses.where, {raw: true}) : false,
                 cursor: this.get(api, options.statement, endpoint, query, _options)
             }).then(function (response) {
 
@@ -385,18 +398,19 @@ define(['altair/facades/declare',
          */
         save: function (entity, options, config) {
 
-            var _options    = options || {},
-                _config     = config || {},
-                action      = entity.primaryValue() ? 'update' : 'insert',
-                e           = _options.event,
-                properties  = _options.properties,
-                endpoint    = action === 'update' ? this._updateEndpoint : this._createEndpoint,
+            var _options = options || {},
+                _config = config || {},
+                action = entity.primaryValue() ? 'update' : 'insert',
+                e = _options.event,
+                properties = _options.properties,
+                endpoint = action === 'update' ? this._updateEndpoint : this._createEndpoint,
                 api;
 
             this.assert(endpoint, 'You must set a _createEndpoint && _updateEndpoint');
             this.assert(entity.shopify || e || _options.shopify, 'You must pass an event or shopify to save({event: e}) or save({ shopify: api }).');
 
-            api = _options.shopify ||  entity.shopify || e.get('shopify');;
+            api = _options.shopify || entity.shopify || e.get('shopify');
+            ;
 
             if (_config.action) {
                 action = _config.action;
@@ -406,7 +420,7 @@ define(['altair/facades/declare',
                 endpoint = endpoint.replace('{{id}}', entity.primaryValue()).replace('{{_id}}', entity.primaryValue());
             }
 
-            return this.all(entity.getValues({}, { methods: ['toShopifyValue', 'toDatabaseValue'] })).then(function (values) {
+            return this.all(entity.getValues({}, {methods: ['toShopifyValue', 'toDatabaseValue']})).then(function (values) {
 
                 //map id
                 values.id = values._id;
@@ -417,13 +431,13 @@ define(['altair/facades/declare',
                 }
 
                 return this.parent.emit('liquidfire:Spectre::will-save-entity', {
-                    store:      this,
-                    action:     action,
-                    entity:     entity,
-                    values:     values,
-                    endpoint:   endpoint,
-                    options:    options,
-                    mapFields:  true
+                    store: this,
+                    action: action,
+                    entity: entity,
+                    values: values,
+                    endpoint: endpoint,
+                    options: options,
+                    mapFields: true
                 });
 
             }.bind(this)).then(function (e) {
@@ -432,8 +446,8 @@ define(['altair/facades/declare',
                     return false;
                 }
 
-                var values  = e.get('values'),
-                    data    = {};
+                var values = e.get('values'),
+                    data = {};
 
                 delete values._id;
 
@@ -498,6 +512,24 @@ define(['altair/facades/declare',
 
         },
 
+        /**
+         * Delete an entity
+         *
+         * @param entity
+         * @param options
+         */
+        deleteEntity: function (entity, options) {
+
+            this.assert(this._deleteEndpoint || this._getEndpoint, 'No _deleteEndpoint specified for ' + this.name);
+
+            var endpoint = this._deleteEndpoint || this._getEndpoint,
+                shop = entity.shopify;
+
+            endpoint = endpoint.replace(/{{_id}}/, entity.primaryValue());
+
+            return this.delete(shop, endpoint);
+
+        }
 
     });
 

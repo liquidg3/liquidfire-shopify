@@ -10,7 +10,7 @@ define(['altair/facades/declare',
 
         startup: function () {
 
-            this._shopify = this.model('liquidfire:Shopify/models/Shopify');
+            this._shopify = this.service('liquidfire:Shopify/services/Shopify'); //this will load relative to the app, so absolute name is required
 
             return this.inherited(arguments);
 

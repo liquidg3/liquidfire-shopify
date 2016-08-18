@@ -117,6 +117,14 @@ define(['altair/facades/declare',
                 delete values.variant;
                 e.set('values', values);
 
+            } else if (values.order) {
+
+                values.owner_resource = 'order';
+                values.owner_id       = values.order;
+
+                delete values.order;
+                e.set('values', values);
+
             }
 
         }

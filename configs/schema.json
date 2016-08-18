@@ -1,9 +1,9 @@
 {
     "properties": {
-        "shopName":    {
-            "type":    "string",
+        "shopName": {
+            "type": "string",
             "options": {
-                "label":   "Shop Name",
+                "label": "Shop Name",
                 "required": true
             }
         },
@@ -16,35 +16,43 @@
                 "default": "0.0.1"
             }
         },
-        "apiKey":       {
-            "type":    "string",
+        "apiKey": {
+            "type": "string",
             "options": {
-                "label":       "API Key",
-                "required":     true
+                "label": "API Key",
+                "required": true
             }
         },
         "sharedSecret": {
-            "type":    "string",
+            "type": "string",
             "options": {
-                "label":       "Shared Secret",
-                "required":    true
+                "label": "Shared Secret",
+                "required": true
             }
         },
         "scope": {
-            "type":    "string",
+            "type": "string",
             "options": {
-                "label":       "Scope",
-                "default":     "read_products"
+                "label": "Scope",
+                "default": "read_products"
+            }
+        },
+        "domain": {
+            "type": "string",
+            "options": {
+                "label": "Domain",
+                "description": "Where are we hosted?.",
+                "required": true
             }
         },
         "redirectUrl": {
-            "type":    "string",
+            "type": "string",
             "options": {
-                "label":       "Redirect URL",
-                "description":     "Where to send someone after authenticating."
+                "label": "Redirect URL",
+                "description": "Path to send someone after authenticating, eg /admin.",
+                "required": true
             }
         },
-
         "privateAppKey": {
             "type": "string",
             "options": {
@@ -52,7 +60,6 @@
                 "description": "Create a new private app and enter the key here and connections will always work to your shop."
             }
         },
-
         "privateAppPassword": {
             "type": "password",
             "options": {
@@ -60,19 +67,17 @@
                 "description": "Create a new private app and enter the password here and connections will always work to your shop."
             }
         },
-
         "preferencesSchema": {
-            "type":    "object",
+            "type": "object",
             "options": {
-                "label":       "Preferences Schema",
-                "description":     "How the preferences form will render for a shop."
+                "label": "Preferences Schema",
+                "description": "How the preferences form will render for a shop."
             }
         },
-
         "localAddress": {
-            "type":    "string",
+            "type": "string",
             "options": {
-                "label":       "Local Address",
+                "label": "Local Address",
                 "description": "Change the IP address requests to Shopify originate from."
             }
         },
@@ -80,7 +85,8 @@
             "type": "string",
             "options": {
                 "label": "Nonce",
-                "description": "For the state check passed back and forth with shopify."
+                "description": "For the state check passed back and forth with shopify.",
+                "required": true
             }
         }
     }

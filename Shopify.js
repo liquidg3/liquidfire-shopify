@@ -38,7 +38,7 @@ define(['altair/facades/declare',
             } else {
 
                 //so we can do work later
-                this._shopifyModel = this.model('liquidfire:Shopify/models/Shopify');
+                this._shopifyService = this.service('Shopify');
 
                 //drop in routes
                 this.on('titan:Alfred::will-execute-app').then(this.hitch('onWillExecuteAlfredApp'));
@@ -147,21 +147,13 @@ define(['altair/facades/declare',
                     shopify_api_key:        this.get('apiKey'),
                     shopify_shared_secret:  this.get('sharedSecret'),
                     shopify_scope:          this.get('scope'),
-                    redirect_uri:           '/shopify/auth',
+                    redirect_uri:           this.get('domain') + '/shopify/auth',
                     verbose:                false,
                     localAddress:           this.get('localAddress'),
                     preferences_schema:     this.get('preferencesSchema'),
                     nonce:                  this.get('nonce')
                 }, options || {});
 
-
-            //drop in domain and protocol
-            if (request) {
-
-                var redirect = request.hostWithProtocol() + _options.redirect_uri;
-                _options.redirect_uri = redirect;
-
-            }
 
             if (this._apiCache[shop]) {
                 return this._apiCache[shop];
@@ -266,7 +258,8 @@ define(['altair/facades/declare',
                                         error = e;
                                     }
 
-                                    callback(error, json, response.headers);
+                                    response.headers.statusCode = response.statusCode;
+                                    callback(error, json, response.headers, response);
                                 }, delay); // Delay the callback if we reached the backoff limit
 
                             });
@@ -359,7 +352,7 @@ define(['altair/facades/declare',
             //load the shop's settings and drop them into the request
             if (shop) {
 
-                return this._shopifyModel.shopSettings(api).then(function (doc) {
+                return this._shopifyService.shopSettings(api).then(function (doc) {
                     e.set('shop', doc);
                 });
 

@@ -16,21 +16,27 @@ define(['altair/facades/declare',
             return this;
         },
 
-        upsertMetafieldOnProduct: function (api, product, values) {
+        upsertOnProduct: function (api, product, values) {
 
-            return this.upsertMetafieldOnEntity('product', api, product, values);
-
-        },
-
-        upsertMetafieldOnCustomer: function (api, customer, values) {
-
-            return this.upsertMetafieldOnEntity('customer', api, customer, values);
+            return this.upsertOnEntity('product', api, product, values);
 
         },
 
-        upsertMetafieldOnProductVariant: function (api, variant, values) {
+        upsertCustomer: function (api, customer, values) {
 
-            return this.upsertMetafieldOnEntity('variant', api, variant, values);
+            return this.upsertOnEntity('customer', api, customer, values);
+
+        },
+
+        upsertOnProductVariant: function (api, variant, values) {
+
+            return this.upsertOnEntity('variant', api, variant, values);
+
+        },
+
+        upsertOnOrder: function (api, order, values) {
+
+            return this.upsertOnEntity('order', api, order, values);
 
         },
 
@@ -42,13 +48,15 @@ define(['altair/facades/declare',
          * @param values
          * @returns {*}
          */
-        upsertMetafieldOnEntity: function (type, api, entity, values) {
+        upsertOnEntity: function (type, api, entity, values) {
 
-            var key         = values.key,
-                namespace   = values.namespace;
+            var key = values.key,
+                namespace = values.namespace,
+                value_type = values.value_type;
 
             this.assert(key, 'You must pass a key in your values');
             this.assert(namespace, 'You must pass a namespace in your values');
+            this.assert(value_type, 'You must pass a value_type (string, integer) in your values');
 
             //find all meta fields for this product
             return this.entity('liquidfire:Shopify/entities/Metafield').then(function (store) {
@@ -76,7 +84,7 @@ define(['altair/facades/declare',
                     field.mixin(values);
                 }
 
-                if(field.has(type)) {
+                if (field.has(type)) {
                     field.set(type, entity);
                 }
 

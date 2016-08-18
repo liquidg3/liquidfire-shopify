@@ -1,6 +1,6 @@
 {
-    "name": "Custom Collection",
-    "tableName": "shopify_custom_collections",
+    "name": "Order",
+    "tableName": "shopify_order",
     "properties": {
         "_id": {
             "type": "primary",
@@ -90,7 +90,8 @@
         "customer": {
             "type": "object",
             "options": {
-                "label": "Customer"
+                "label": "Customer",
+                "description": "Maps to liquidfire:Shopify/entities/Customer"
             }
         },
         "discount_codes": {
@@ -289,6 +290,12 @@
             "type": "integer",
             "options": {
                 "label": "User ID"
+            }
+        },
+        "transactions": {
+            "type": "object",
+            "options": {
+                "many": true
             }
         }
     }
